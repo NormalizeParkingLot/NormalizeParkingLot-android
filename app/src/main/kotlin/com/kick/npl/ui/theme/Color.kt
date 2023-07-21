@@ -1,66 +1,108 @@
 package com.kick.npl.ui.theme
+
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-val light_primary = Color(0xFF00696F)
-val light_onPrimary = Color(0xFFFFFFFF)
-val light_primaryContainer = Color(0xFF74F5FF)
-val light_onPrimaryContainer = Color(0xFF002022)
-val light_secondary = Color(0xFF4A6365)
-val light_onSecondary = Color(0xFFFFFFFF)
-val light_secondaryContainer = Color(0xFFCCE8EA)
-val light_onSecondaryContainer = Color(0xFF051F21)
-val light_tertiary = Color(0xFF4F5F7D)
-val light_onTertiary = Color(0xFFFFFFFF)
-val light_tertiaryContainer = Color(0xFFD6E3FF)
-val light_onTertiaryContainer = Color(0xFF091B36)
-val light_error = Color(0xFFBA1A1A)
-val light_errorContainer = Color(0xFFFFDAD6)
-val light_onError = Color(0xFFFFFFFF)
-val light_onErrorContainer = Color(0xFF410002)
-val light_background = Color(0xFFFAFDFC)
-val light_onBackground = Color(0xFF191C1C)
-val light_surface = Color(0xFFFAFDFC)
-val light_onSurface = Color(0xFF191C1C)
-val light_surfaceVariant = Color(0xFFDAE4E5)
-val light_onSurfaceVariant = Color(0xFF3F4849)
-val light_outline = Color(0xFF6F797A)
-val light_inverseOnSurface = Color(0xFFEFF1F1)
-val light_inverseSurface = Color(0xFF2D3131)
-val light_inversePrimary = Color(0xFF4CD9E3)
-val light_shadow = Color(0xFF000000)
-val light_surfaceTint = Color(0xFF00696F)
-val light_outlineVariant = Color(0xFFBEC8C9)
-val light_scrim = Color(0xFF000000)
+@Immutable
+data class CustomColors(
+    val primary: Color,
+    val primaryContainer: Color,
+    val onPrimaryContainer: Color,
+    val background: Color,
+    val surface: Color,
+    val surface90: Color,
+    val surface99: Color,
+    val line: Color,
+    val secondaryLine: Color,
+    val onBackground0: Color,
+    val onBackground40: Color,
+    val onBackground60: Color,
+    val onBackground70: Color,
+    val onSurface0: Color,
+    val onSurface40: Color,
+    val onSurface60: Color,
+    val onSurface70: Color,
+    val onSurface90: Color,
+    val secondarySurface: Color,
+    val secondarySurface40: Color,
+    val secondarySurface50: Color,
+    val secondarySurface90: Color,
+    val onSecondarySurface0: Color,
+    val onBackgroundGradation: List<Color>,
+    val onSurfaceGradation: List<Color>,
+    val onSurface99Gradation: List<Color>,
+    val onSurface90Gradation: List<Color>,
+    val error: Color,
+    // Gradation
+    val onBackgroundGradientColor: GradientColor,
+    val onSurfaceGradientColor: GradientColor,
+    val onSurface99GradientColor: GradientColor,
+    val onSurface90GradientColor: GradientColor,
+    // Graph
+    val graphHigh: Color,
+    val graphHigh40: Color,
+    val graphHigh80: Color,
+    val graphHigh90: Color,
+    val graphCaution: Color,
+    val graphCaution90: Color,
+    val graphSafety: Color,
+    val graphSafety10: Color,
+    val graphSafety40: Color,
+    val graphSafety90: Color,
+    val graphSafety99: Color,
+    val graphLow: Color,
+    val graphLow40: Color
+)
 
-val dark_primary = Color(0xFF4CD9E3)
-val dark_onPrimary = Color(0xFF00363A)
-val dark_primaryContainer = Color(0xFF004F54)
-val dark_onPrimaryContainer = Color(0xFF74F5FF)
-val dark_secondary = Color(0xFFB1CBCE)
-val dark_onSecondary = Color(0xFF1B3436)
-val dark_secondaryContainer = Color(0xFF324B4D)
-val dark_onSecondaryContainer = Color(0xFFCCE8EA)
-val dark_tertiary = Color(0xFFB7C7EA)
-val dark_onTertiary = Color(0xFF20304C)
-val dark_tertiaryContainer = Color(0xFF374764)
-val dark_onTertiaryContainer = Color(0xFFD6E3FF)
-val dark_error = Color(0xFFFFB4AB)
-val dark_errorContainer = Color(0xFF93000A)
-val dark_onError = Color(0xFF690005)
-val dark_onErrorContainer = Color(0xFFFFDAD6)
-val dark_background = Color(0xFF191C1C)
-val dark_onBackground = Color(0xFFE0E3E3)
-val dark_surface = Color(0xFF191C1C)
-val dark_onSurface = Color(0xFFE0E3E3)
-val dark_surfaceVariant = Color(0xFF3F4849)
-val dark_onSurfaceVariant = Color(0xFFBEC8C9)
-val dark_outline = Color(0xFF899393)
-val dark_inverseOnSurface = Color(0xFF191C1C)
-val dark_inverseSurface = Color(0xFFE0E3E3)
-val dark_inversePrimary = Color(0xFF00696F)
-val dark_shadow = Color(0xFF000000)
-val dark_surfaceTint = Color(0xFF4CD9E3)
-val dark_outlineVariant = Color(0xFF3F4849)
-val dark_scrim = Color(0xFF000000)
-
-val seed = Color(0xFF00696F)
+val LocalCustomColors = staticCompositionLocalOf {
+    CustomColors(
+        primary = Color.Unspecified,
+        primaryContainer = Color.Unspecified,
+        onPrimaryContainer = Color.Unspecified,
+        background = Color.Unspecified,
+        surface = Color.Unspecified,
+        surface90 = Color.Unspecified,
+        surface99 = Color.Unspecified,
+        line = Color.Unspecified,
+        onBackground0 = Color.Unspecified,
+        onBackground40 = Color.Unspecified,
+        onBackground60 = Color.Unspecified,
+        onBackground70 = Color.Unspecified,
+        onSurface0 = Color.Unspecified,
+        onSurface40 = Color.Unspecified,
+        onSurface60 = Color.Unspecified,
+        onSurface70 = Color.Unspecified,
+        onSurface90 = Color.Unspecified,
+        secondaryLine = Color.Unspecified,
+        secondarySurface = Color.Unspecified,
+        secondarySurface40 = Color.Unspecified,
+        secondarySurface50 = Color.Unspecified,
+        secondarySurface90 = Color.Unspecified,
+        onSecondarySurface0 = Color.Unspecified,
+        onBackgroundGradation = emptyList(),
+        onSurfaceGradation = emptyList(),
+        onSurface99Gradation = emptyList(),
+        onSurface90Gradation = emptyList(),
+        error = Color.Unspecified,
+        // Gradation
+        onBackgroundGradientColor = GradientColor.Unspecified,
+        onSurfaceGradientColor = GradientColor.Unspecified,
+        onSurface99GradientColor = GradientColor.Unspecified,
+        onSurface90GradientColor = GradientColor.Unspecified,
+        // Graph
+        graphHigh = Color.Unspecified,
+        graphHigh40 = Color.Unspecified,
+        graphHigh80 = Color.Unspecified,
+        graphHigh90 = Color.Unspecified,
+        graphCaution = Color.Unspecified,
+        graphCaution90 = Color.Unspecified,
+        graphSafety = Color.Unspecified,
+        graphSafety10 = Color.Unspecified,
+        graphSafety40 = Color.Unspecified,
+        graphSafety90 = Color.Unspecified,
+        graphSafety99 = Color.Unspecified,
+        graphLow = Color.Unspecified,
+        graphLow40 = Color.Unspecified,
+    )
+}

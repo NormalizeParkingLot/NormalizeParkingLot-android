@@ -8,6 +8,6 @@ import dagger.hilt.android.HiltAndroidApp
 class NPLApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // NaverMapSdk.getInstance(this).client = NaverMapSdk.NaverCloudPlatformClient(NAVER_MAP_CLIENT_ID)
+          NaverMapSdk.getInstance(this).client = NaverMapSdk.NaverCloudPlatformClient(BuildConfig.NAVER_MAP_CLIENT_ID)
     }
 }
