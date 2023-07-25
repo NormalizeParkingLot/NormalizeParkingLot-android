@@ -2,6 +2,7 @@ package com.kick.npl.data.di
 
 import android.content.Context
 import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.GsonBuilder
 import com.kick.npl.BuildConfig.NAVER_MAP_API_KEY
 import com.kick.npl.BuildConfig.NAVER_MAP_CLIENT_ID
@@ -22,6 +23,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val BASE_URL = "https://naveropenapi.apigw.ntruss.com/"
+
+    @Provides
+    @Singleton
+    fun provideFirestoreInstance(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
+    }
 
     @Provides
     @Singleton

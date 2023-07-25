@@ -3,7 +3,7 @@ package com.kick.npl.model
 import com.naver.maps.geometry.LatLng
 
 data class ParkingLotData(
-    val id: Int,
+    val id: String,
     val name: String,
     val address: String,
     val addressDetail: String,
@@ -15,7 +15,7 @@ data class ParkingLotData(
 ) {
     companion object {
         val TEST = ParkingLotData(
-            id = 0,
+            id = "",
             name = "테스트 주차장",
             address = "테스트 주소",
             addressDetail = "테스트 상세 주소",

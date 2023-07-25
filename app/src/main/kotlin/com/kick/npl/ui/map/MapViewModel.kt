@@ -9,12 +9,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kick.npl.data.repository.MapsRepository
+import com.kick.npl.data.repository.ParkingLotsRepository
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.model.ParkingLotType
 import com.kick.npl.ui.map.model.SelectedParkingLotData
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.LatLngBounds
-import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
@@ -32,6 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val mapsRepository: MapsRepository,
+    private val parkingLotsRepository: ParkingLotsRepository,
 ) : ViewModel() {
 
     private var _parkingLots: MutableStateFlow<List<ParkingLotData>> = MutableStateFlow(emptyList())
@@ -51,7 +52,11 @@ class MapViewModel @Inject constructor(
 
     init {
         ParkingLotType.values().forEach { filterMap[it] = false }
-        _parkingLots.value = generateSampleParkingLots()
+        // Mock
+        //_parkingLots.value = generateSampleParkingLots()
+        viewModelScope.launch {
+            _parkingLots.value = parkingLotsRepository.getAllParkingLots() ?: emptyList()
+        }
     }
 
     fun onLocationChange(location: Location) {

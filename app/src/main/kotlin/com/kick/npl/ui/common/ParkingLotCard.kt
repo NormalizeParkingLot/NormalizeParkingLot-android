@@ -43,7 +43,7 @@ private fun Preview() {
                 addressDetail = "테스트 주차장",
                 pricePer10min = 1000,
                 latLng = LatLng(37.498095, 127.031693),
-                id = 4389,
+                id = "4389",
                 imageUri = "sanctus",
                 favorite = false,
                 parkingLotType = ParkingLotType.TYPE_A,
