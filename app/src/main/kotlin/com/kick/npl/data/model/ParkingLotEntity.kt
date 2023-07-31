@@ -17,6 +17,9 @@ data class ParkingLotEntity(
     val isOccupied: Boolean = true,
     @PropertyName("price")
     val price: Int = 0,
+    @PropertyName("imageUri")
+    val imageUri: String = "",
+    @PropertyName("latlng")
     val latlng: GeoPoint = GeoPoint(0.0, 0.0),
 )
 
@@ -27,7 +30,7 @@ fun ParkingLotEntity.toParkingLotData(): ParkingLotData {
         address = "테스트",
         addressDetail = "테스트",
         imageUri = "https://naver.com",
-        latLng = LatLng(37.358315, 127.114454),
+        latLng = LatLng(latlng.latitude, latlng.longitude),
         favorite = false,
         pricePer10min = price,
         parkingLotType = ParkingLotType.TYPE_A

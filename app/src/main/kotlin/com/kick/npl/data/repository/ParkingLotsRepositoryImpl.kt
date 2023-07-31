@@ -5,6 +5,7 @@ import com.kick.npl.data.model.ParkingLotEntity
 import com.kick.npl.data.model.toParkingLotData
 import com.kick.npl.data.util.module
 import com.kick.npl.model.ParkingLotData
+import com.kick.npl.model.toParkingLotEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -18,11 +19,11 @@ class ParkingLotsRepositoryImpl @Inject constructor(
     private val fireStore: FirebaseFirestore,
 ) : ParkingLotsRepository {
 
-    override suspend fun setParkingLot(parkingLot: ParkingLotEntity) {
+    override suspend fun setParkingLot(parkingLotData: ParkingLotData) {
         return suspendCancellableCoroutine { cancellableContinuation ->
             fireStore.module()
-                .document(parkingLot.id)
-                .set(parkingLot)
+                .document(parkingLotData.id)
+                .set(parkingLotData.toParkingLotEntity())
                 .addOnSuccessListener {
                     cancellableContinuation.resume(Unit)
                 }

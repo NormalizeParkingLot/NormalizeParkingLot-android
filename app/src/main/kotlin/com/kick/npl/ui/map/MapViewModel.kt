@@ -53,7 +53,6 @@ class MapViewModel @Inject constructor(
     init {
         ParkingLotType.values().forEach { filterMap[it] = false }
         // Mock
-        //_parkingLots.value = generateSampleParkingLots()
         viewModelScope.launch {
             _parkingLots.value = parkingLotsRepository.getAllParkingLots() ?: emptyList()
         }

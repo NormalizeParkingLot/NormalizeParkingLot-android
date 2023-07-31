@@ -1,5 +1,7 @@
 package com.kick.npl.model
 
+import com.google.firebase.firestore.GeoPoint
+import com.kick.npl.data.model.ParkingLotEntity
 import com.naver.maps.geometry.LatLng
 
 data class ParkingLotData(
@@ -26,4 +28,16 @@ data class ParkingLotData(
             parkingLotType = ParkingLotType.TYPE_A,
         )
     }
+}
+
+fun ParkingLotData.toParkingLotEntity() : ParkingLotEntity {
+    return ParkingLotEntity(
+        id = id,
+        name = name,
+        isBlocked = false,
+        isOccupied = false,
+        price = pricePer10min,
+        imageUri = "test",
+        latlng = GeoPoint(latLng.latitude, latLng.longitude),
+    )
 }
