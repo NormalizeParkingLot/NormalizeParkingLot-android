@@ -63,29 +63,33 @@ class MapViewModel @Inject constructor(
         currentLatLng = LatLng(location.latitude, location.longitude)
     }
 
+    fun onMarkerUnselected() {
+        selectedParkingLot = null
+    }
+
     @OptIn(ExperimentalNaverMapApi::class)
     fun onMarkerClicked(
         parkingLotData: ParkingLotData,
     ) = viewModelScope.launch(Dispatchers.IO) {
+
+        selectedParkingLot = SelectedParkingLotData(
+            parkingLotData = parkingLotData,
+            routeFromCurrent = null,
+        )
 
         val route = getDrivingRoute(
             currentLatLng ?: return@launch,
             parkingLotData.latLng,
         ) ?: return@launch
 
-        val (leftBottom, rightTop) = route.summary.bbox.let {
-            LatLng(it[0][1], it[0][0]) to LatLng(it[1][1], it[1][0])
-        }
+        selectedParkingLot = selectedParkingLot?.copy(routeFromCurrent = route)
 
+        val (leftBottom, rightTop) = route.summary.getBounds()
         cameraPositionState.animate(
             update = CameraUpdate.fitBounds(
-                LatLngBounds(leftBottom, rightTop), 200
+                LatLngBounds(leftBottom, rightTop),
+                200, 200, 200, 500
             )
-        )
-
-        selectedParkingLot = SelectedParkingLotData(
-            parkingLotData = parkingLotData,
-            routeFromCurrent = route,
         )
     }
 

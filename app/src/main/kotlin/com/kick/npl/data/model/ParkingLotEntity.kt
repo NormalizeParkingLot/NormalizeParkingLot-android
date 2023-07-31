@@ -1,5 +1,6 @@
 package com.kick.npl.data.model
 
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.PropertyName
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.model.ParkingLotType
@@ -16,6 +17,7 @@ data class ParkingLotEntity(
     val isOccupied: Boolean = true,
     @PropertyName("price")
     val price: Int = 0,
+    val latlng: GeoPoint = GeoPoint(0.0, 0.0),
 )
 
 fun ParkingLotEntity.toParkingLotData(): ParkingLotData {

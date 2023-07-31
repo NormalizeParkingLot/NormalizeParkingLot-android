@@ -1,8 +1,16 @@
 package com.kick.npl.ui.map
 
 import android.location.Location
+import android.util.Log
 import android.view.Gravity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -16,7 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +45,8 @@ import com.kick.npl.ui.common.ParkingLotCard
 import com.kick.npl.ui.map.model.SelectedParkingLotData
 import com.kick.npl.ui.theme.NPLTheme
 import com.kick.npl.ui.theme.Theme
+import com.kick.npl.ui.util.AnimatedPlates
+import com.kick.npl.ui.util.AnimatedValueVisibility
 import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.naver.maps.map.compose.LocationTrackingMode
@@ -66,6 +79,7 @@ fun MapScreen(
     filterMap: Map<ParkingLotType, Boolean> = emptyMap(),
     onFilterSelected: (ParkingLotType) -> Unit = {},
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
+    onMarkerUnselected: () -> Unit = {},
     onParkingLotMarkerClicked: (ParkingLotData) -> Unit = {},
     onLocationChange: (Location) -> Unit = {},
 ) = Column(
@@ -97,6 +111,7 @@ fun MapScreen(
                 selectedParkingLot,
                 cameraPositionState,
                 onParkingLotMarkerClicked,
+                onMarkerUnselected,
                 onLocationChange
             )
         }
@@ -110,13 +125,12 @@ fun MapScreenContent(
     selectedParkingLot: SelectedParkingLotData?,
     cameraPositionState: CameraPositionState,
     onParkingLotMarkerClicked: (ParkingLotData) -> Unit,
+    onMarkerUnselected: () -> Unit,
     onLocationChange: (Location) -> Unit,
 ) {
-    var isFloatingVisible by remember { mutableStateOf(false) }
-
     Box {
         AnimatedVisibility(
-            visible = isFloatingVisible && selectedParkingLot != null,
+            visible = selectedParkingLot != null,
             enter = slideInVertically { it / 2 } + fadeIn(),
             exit = slideOutVertically { it / 2 } + fadeOut(),
             modifier = Modifier
@@ -124,8 +138,8 @@ fun MapScreenContent(
                 .padding(bottom = 85.dp)
         ) {
             ParkingLotCard(
-                selectedParkingLot?.parkingLotData ?: return@AnimatedVisibility,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                selectedParkingLot?.parkingLotData,
+                modifier = Modifier.padding(horizontal = 12.dp)
             )
         }
 
@@ -155,12 +169,31 @@ fun MapScreenContent(
             locationSource = rememberFusedLocationSource(),
             cameraPositionState = cameraPositionState,
             onLocationChange = onLocationChange,
-            onMapClick = { _, _ -> isFloatingVisible = false }
+            onMapClick = { _, _ -> onMarkerUnselected() }
         ) {
-            if (isFloatingVisible && selectedParkingLot?.routeFromCurrent != null) {
+            val isOverlaiesVisible by remember(selectedParkingLot) {
+                derivedStateOf {
+                    selectedParkingLot?.routeFromCurrent != null
+                }
+            }
+            val animatedMarkerSize by animateFloatAsState(
+                targetValue = if (isOverlaiesVisible) 1f else 0.5f, label = ""
+            )
+            val animatedPathProgress by animateFloatAsState(
+                label = "",
+                targetValue = if (isOverlaiesVisible) 1f else 0.1f,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+
+            if (isOverlaiesVisible) {
                 PathOverlay(
-                    coords = selectedParkingLot.routeFromCurrent.getPathList(),
-                    width = 10.dp,
+                    coords = selectedParkingLot!!.routeFromCurrent!!.getPathList().let {
+                        it.subList(0, (it.lastIndex * animatedPathProgress).toInt())
+                    },
+                    width = (animatedMarkerSize * 10).dp,
                     outlineWidth = 1.dp,
                     color = Theme.colors.graphSafety40,
                     patternImage = OverlayImage.fromResource(R.drawable.ic_double_arrow_navigate),
@@ -168,31 +201,38 @@ fun MapScreenContent(
                     globalZIndex = 1
                 )
                 Marker(
+                    width = (animatedMarkerSize * 79).dp,
+                    height = (animatedMarkerSize * 53).dp,
                     zIndex = 2,
                     icon = OverlayImage.fromResource(R.drawable.ic_marker_current),
                     iconTintColor = Theme.colors.primary,
                     state = MarkerState(
-                        position = selectedParkingLot.routeFromCurrent.summary.getStartLatLng()
+                        position = selectedParkingLot.routeFromCurrent!!.summary.getStartLatLng()
                     ),
                 )
             }
 
             parkingLotList.forEach { parkingLotData ->
                 val isSelected = selectedParkingLot?.parkingLotData?.id == parkingLotData.id
+                val animatedSize by animateFloatAsState(
+                    label = "marker size multiplier",
+                    targetValue = if(isSelected) 1.3f else 1f
+                )
+
                 Marker(
-                    width = if(isSelected && isFloatingVisible) 42.dp else if(!isFloatingVisible) 32.dp else 25.dp,
-                    height = if(isSelected && isFloatingVisible) 45.dp else if(!isFloatingVisible) 36.dp else 28.dp,
-                    zIndex = if(isSelected && isFloatingVisible) 2 else 0,
+                    width =  (animatedSize * 35).dp,
+                    height = (animatedSize * 38).dp,
+                    zIndex = if(isSelected) 2 else 0,
                     icon = OverlayImage.fromResource(R.drawable.ic_marker),
                     iconTintColor = Theme.colors.primary,
                     state = MarkerState(parkingLotData.latLng),
                     captionMinZoom = 11.0,
                     subCaptionMinZoom = 11.0,
-                    captionText = parkingLotData.name.takeIf { !isFloatingVisible },
-                    subCaptionText = "${parkingLotData.pricePer10min}원/10분".takeIf { !isFloatingVisible },
+                    captionText = parkingLotData.name,
+                    subCaptionText = "${parkingLotData.pricePer10min}원/10분"
+                        .takeIf { selectedParkingLot == null },
                     onClick = {
                         onParkingLotMarkerClicked(parkingLotData)
-                        isFloatingVisible = true
                         true
                     }
                 )

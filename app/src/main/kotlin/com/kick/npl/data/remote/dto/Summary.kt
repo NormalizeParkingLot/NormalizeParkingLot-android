@@ -12,9 +12,9 @@ data class Summary(
     fun getStartLatLng() = LatLng(start.getLatitude(), start.getLongitude())
     fun getGoalLatLng() = LatLng(goal.getLatitude(), goal.getLongitude())
     fun getWaypointLatLngs() = waypoints.map { LatLng(it.getLatitude(), it.getLongitude()) }
-    fun getBbox() = Pair(
-        LatLng(bbox[0][0], bbox[0][1]),
-        LatLng(bbox[1][0], bbox[1][1])
+    fun getBounds() = Pair(
+        LatLng(bbox[0][1], bbox[0][0]),
+        LatLng(bbox[1][1], bbox[1][0])
     )
     fun getCenterPoint() = LatLng(
         (bbox[0][1] + bbox[1][1]) / 2,

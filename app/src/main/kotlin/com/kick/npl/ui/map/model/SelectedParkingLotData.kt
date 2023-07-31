@@ -5,5 +5,5 @@ import com.kick.npl.model.ParkingLotData
 
 data class SelectedParkingLotData(
     val parkingLotData: ParkingLotData,
-    val routeFromCurrent: RouteUnitEnt
+    val routeFromCurrent: RouteUnitEnt?
 )

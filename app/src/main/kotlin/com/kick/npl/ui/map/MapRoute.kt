@@ -40,6 +40,7 @@ fun MapRoute(
         onFilterSelected = viewModel::onFilterSelected,
         cameraPositionState = viewModel.cameraPositionState,
         onParkingLotMarkerClicked = viewModel::onMarkerClicked,
+        onMarkerUnselected = viewModel::onMarkerUnselected,
         onLocationChange = viewModel::onLocationChange,
     )
 }

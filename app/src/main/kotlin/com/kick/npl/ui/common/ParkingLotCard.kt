@@ -54,7 +54,7 @@ private fun Preview() {
 
 @Composable
 fun ParkingLotCard(
-    parkingLotData: ParkingLotData,
+    parkingLotData: ParkingLotData?,
     modifier: Modifier = Modifier,
     haveBorder: Boolean = false,
 ) = Card(
@@ -79,7 +79,9 @@ fun ParkingLotCard(
                     1.dp, Color.Gray, RoundedCornerShape(4.dp)
                 )
         )
-        ParkingLotCardContent(parkingLotData)
+        parkingLotData?.let {
+            ParkingLotCardContent(it)
+        }
     }
 }
 
