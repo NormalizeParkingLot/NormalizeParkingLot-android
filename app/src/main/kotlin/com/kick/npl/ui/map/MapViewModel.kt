@@ -12,6 +12,7 @@ import com.kick.npl.data.repository.MapsRepository
 import com.kick.npl.data.repository.ParkingLotsRepository
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.model.ParkingLotType
+import com.kick.npl.ui.map.model.ParkingDateTime
 import com.kick.npl.ui.map.model.SelectedParkingLotData
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.LatLngBounds
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,6 +49,10 @@ class MapViewModel @Inject constructor(
 
     val filterMap = mutableStateMapOf<ParkingLotType, Boolean>()
 
+    var parkingDateTime by mutableStateOf(
+        ParkingDateTime(LocalDateTime.now(), LocalDateTime.now().plusHours(2))
+    )
+
     var selectedParkingLot by mutableStateOf<SelectedParkingLotData?>(null)
         private set
 
@@ -56,6 +62,10 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             _parkingLots.value = parkingLotsRepository.getAllParkingLots() ?: emptyList()
         }
+    }
+
+    fun onParkingDateTimeChanged(parkingDateTime: ParkingDateTime) {
+        this.parkingDateTime = parkingDateTime
     }
 
     fun onLocationChange(location: Location) {

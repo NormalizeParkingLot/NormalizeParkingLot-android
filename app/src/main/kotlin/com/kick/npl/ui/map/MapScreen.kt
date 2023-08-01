@@ -4,12 +4,8 @@ import android.location.Location
 import android.util.Log
 import android.view.Gravity
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -27,26 +23,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.kick.npl.R
 import com.kick.npl.model.ParkingLotData
-import com.kick.npl.model.ParkingLotType
 import com.kick.npl.ui.common.BottomSheet
 import com.kick.npl.ui.common.ParkingLotCard
+import com.kick.npl.ui.map.component.DateTimePickerBottomSheet
+import com.kick.npl.ui.map.component.TimeRangeBar
+import com.kick.npl.ui.map.model.ParkingDateTime
 import com.kick.npl.ui.map.model.SelectedParkingLotData
 import com.kick.npl.ui.theme.NPLTheme
 import com.kick.npl.ui.theme.Theme
-import com.kick.npl.ui.util.AnimatedPlates
-import com.kick.npl.ui.util.AnimatedValueVisibility
 import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.naver.maps.map.compose.LocationTrackingMode
@@ -54,40 +48,44 @@ import com.naver.maps.map.compose.MapProperties
 import com.naver.maps.map.compose.MapType
 import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.Marker
-import com.naver.maps.map.compose.MarkerDefaults
 import com.naver.maps.map.compose.MarkerState
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.PathOverlay
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
 import com.naver.maps.map.overlay.OverlayImage
-
-@Preview
-@Composable
-fun MapPreview() {
-    NPLTheme {
-        MapScreen(
-            generateSampleParkingLots()
-        )
-    }
-}
+import java.time.LocalDateTime
 
 @Composable
 fun MapScreen(
     parkingLotList: List<ParkingLotData>,
     selectedParkingLot: SelectedParkingLotData? = null,
-    filterMap: Map<ParkingLotType, Boolean> = emptyMap(),
-    onFilterSelected: (ParkingLotType) -> Unit = {},
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
+    parkingDateTime: ParkingDateTime,
     onMarkerUnselected: () -> Unit = {},
     onParkingLotMarkerClicked: (ParkingLotData) -> Unit = {},
     onLocationChange: (Location) -> Unit = {},
+    onParkingDateTimeChanged: (ParkingDateTime) -> Unit = {},
 ) = Column(
     modifier = Modifier.fillMaxSize()
 ) {
-    FilterBar(
-        filterEnable = filterMap,
-        onFilterSelected = onFilterSelected
+    var isTimePickerVisible by remember { mutableStateOf(false) }
+
+    DateTimePickerBottomSheet(
+        enabled = isTimePickerVisible,
+        startTime = parkingDateTime.startTime,
+        endTime = parkingDateTime.endTime,
+        onDismissRequest = { isTimePickerVisible = false },
+        onClickConfirm = { startTime, endTime ->
+            isTimePickerVisible = false
+            onParkingDateTimeChanged(ParkingDateTime(startTime, endTime))
+        },
+    )
+
+    TimeRangeBar(
+        startTime = parkingDateTime.startTime,
+        endTime = parkingDateTime.endTime,
+        onClickChangeButton = { isTimePickerVisible = true }
     )
 
     BottomSheet(
@@ -171,24 +169,24 @@ fun MapScreenContent(
             onLocationChange = onLocationChange,
             onMapClick = { _, _ -> onMarkerUnselected() }
         ) {
-            val isOverlaiesVisible by remember(selectedParkingLot) {
+            val isOverlayVisible by remember(selectedParkingLot) {
                 derivedStateOf {
                     selectedParkingLot?.routeFromCurrent != null
                 }
             }
             val animatedMarkerSize by animateFloatAsState(
-                targetValue = if (isOverlaiesVisible) 1f else 0.5f, label = ""
+                targetValue = if (isOverlayVisible) 1f else 0.5f, label = ""
             )
             val animatedPathProgress by animateFloatAsState(
                 label = "",
-                targetValue = if (isOverlaiesVisible) 1f else 0.1f,
+                targetValue = if (isOverlayVisible) 1f else 0.1f,
                 animationSpec = tween(
                     durationMillis = 500,
                     easing = LinearOutSlowInEasing
                 )
             )
 
-            if (isOverlaiesVisible) {
+            if (isOverlayVisible) {
                 PathOverlay(
                     coords = selectedParkingLot!!.routeFromCurrent!!.getPathList().let {
                         it.subList(0, (it.lastIndex * animatedPathProgress).toInt())

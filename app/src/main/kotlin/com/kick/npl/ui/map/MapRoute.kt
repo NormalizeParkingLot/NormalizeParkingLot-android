@@ -35,12 +35,12 @@ fun MapRoute(
 
     MapScreen(
         parkingLotList = parkingLotList,
-        filterMap = viewModel.filterMap,
         selectedParkingLot = viewModel.selectedParkingLot,
-        onFilterSelected = viewModel::onFilterSelected,
         cameraPositionState = viewModel.cameraPositionState,
+        parkingDateTime = viewModel.parkingDateTime,
         onParkingLotMarkerClicked = viewModel::onMarkerClicked,
         onMarkerUnselected = viewModel::onMarkerUnselected,
         onLocationChange = viewModel::onLocationChange,
+        onParkingDateTimeChanged = viewModel::onParkingDateTimeChanged,
     )
 }
