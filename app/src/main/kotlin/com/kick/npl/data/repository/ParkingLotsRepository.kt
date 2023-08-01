@@ -7,4 +7,5 @@ interface ParkingLotsRepository {
     suspend fun getParkingLot(id: String): ParkingLotEntity?
     suspend fun getAllParkingLots(): List<ParkingLotData>?
     suspend fun setParkingLot(parkingLotData: ParkingLotData)
+    suspend fun toggleFavorite(id: String, favorite: Boolean)
 }

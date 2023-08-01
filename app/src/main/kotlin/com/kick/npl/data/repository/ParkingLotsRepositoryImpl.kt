@@ -1,5 +1,6 @@
 package com.kick.npl.data.repository
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.kick.npl.data.model.ParkingLotEntity
 import com.kick.npl.data.model.toParkingLotData
@@ -18,20 +19,6 @@ import kotlin.coroutines.resumeWithException
 class ParkingLotsRepositoryImpl @Inject constructor(
     private val fireStore: FirebaseFirestore,
 ) : ParkingLotsRepository {
-
-    override suspend fun setParkingLot(parkingLotData: ParkingLotData) {
-        return suspendCancellableCoroutine { cancellableContinuation ->
-            fireStore.module()
-                .document(parkingLotData.id)
-                .set(parkingLotData.toParkingLotEntity())
-                .addOnSuccessListener {
-                    cancellableContinuation.resume(Unit)
-                }
-                .addOnFailureListener { exception ->
-                    cancellableContinuation.resumeWithException(exception)
-                }
-        }
-    }
 
     override suspend fun getParkingLot(id: String): ParkingLotEntity? {
         return suspendCancellableCoroutine { cancellableContinuation ->
@@ -61,8 +48,8 @@ class ParkingLotsRepositoryImpl @Inject constructor(
                 .addOnSuccessListener { documents ->
                     documents
                         .asSequence()
-                        .map { it.toObject(ParkingLotEntity::class.java) }
-                        .map { it.toParkingLotData() }
+                        .map { it.id to it.toObject(ParkingLotEntity::class.java) }
+                        .map { (id, data) -> data.toParkingLotData(id) }
                         .toList()
                         .let { cancellableContinuation.resume(it) }
 
@@ -70,7 +57,38 @@ class ParkingLotsRepositoryImpl @Inject constructor(
                 .addOnFailureListener { exception ->
                     cancellableContinuation.resumeWithException(exception)
                 }
+        }
+    }
 
+    override suspend fun setParkingLot(parkingLotData: ParkingLotData) {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            fireStore.module()
+                .document(parkingLotData.id)
+                .set(parkingLotData.toParkingLotEntity())
+                .addOnSuccessListener {
+                    cancellableContinuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    cancellableContinuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    override suspend fun toggleFavorite(
+        id: String,
+        favorite: Boolean
+    ) {
+        Log.e("TEST", "toggleFavorite $id $favorite")
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            fireStore.module()
+                .document(id)
+                .update("favorite", favorite)
+                .addOnSuccessListener {
+                    cancellableContinuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    cancellableContinuation.resumeWithException(exception)
+                }
         }
     }
 }

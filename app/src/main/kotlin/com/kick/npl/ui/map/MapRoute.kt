@@ -31,10 +31,8 @@ fun NavGraphBuilder.mapGraph(
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
 ) {
-    val parkingLotList by viewModel.parkingLots.collectAsStateWithLifecycle()
-
     MapScreen(
-        parkingLotList = parkingLotList,
+        parkingLotList = viewModel.parkingLotList,
         selectedParkingLot = viewModel.selectedParkingLot,
         cameraPositionState = viewModel.cameraPositionState,
         parkingDateTime = viewModel.parkingDateTime,
@@ -42,5 +40,7 @@ fun MapRoute(
         onMarkerUnselected = viewModel::onMarkerUnselected,
         onLocationChange = viewModel::onLocationChange,
         onParkingDateTimeChanged = viewModel::onParkingDateTimeChanged,
+        onClickFavorite = viewModel::onClickFavorite,
+        onClickParkingLotCard = viewModel::onClickParkingLotCard,
     )
 }

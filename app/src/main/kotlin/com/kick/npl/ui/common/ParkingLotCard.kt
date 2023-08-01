@@ -3,6 +3,7 @@ package com.kick.npl.ui.common
 import android.icu.text.DecimalFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,26 +11,34 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kick.npl.R
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.model.ParkingLotType
 import com.kick.npl.ui.theme.NPLTheme
 import com.kick.npl.ui.theme.Theme
+import com.kick.npl.ui.util.noRippleClickable
 import com.naver.maps.geometry.LatLng
 
 @Preview
@@ -57,6 +66,8 @@ fun ParkingLotCard(
     parkingLotData: ParkingLotData?,
     modifier: Modifier = Modifier,
     haveBorder: Boolean = false,
+    onClickCard: () -> Unit = {},
+    onClickFavorite: () -> Unit = {},
 ) = Card(
     modifier = modifier.fillMaxWidth(),
     shape = CardDefaults.elevatedShape,
@@ -64,8 +75,8 @@ fun ParkingLotCard(
         containerColor = Theme.colors.surface,
         contentColor = Theme.colors.onSurface0,
     ),
-    border = if(haveBorder) CardDefaults.outlinedCardBorder() else null,
-    elevation = if(haveBorder) CardDefaults.cardElevation() else CardDefaults.elevatedCardElevation()
+    border = if (haveBorder) CardDefaults.outlinedCardBorder() else null,
+    elevation = if (haveBorder) CardDefaults.cardElevation() else CardDefaults.elevatedCardElevation()
 ) {
     Row(
         modifier = Modifier.padding(16.dp),
@@ -79,8 +90,12 @@ fun ParkingLotCard(
                     1.dp, Color.Gray, RoundedCornerShape(4.dp)
                 )
         )
-        parkingLotData?.let {
-            ParkingLotCardContent(it)
+        parkingLotData?.let { parkingLotData ->
+            ParkingLotCardContent(
+                parkingLotData = parkingLotData,
+                onClickCard = onClickCard,
+                onClickFavorite = onClickFavorite
+            )
         }
     }
 }
@@ -88,20 +103,45 @@ fun ParkingLotCard(
 @Composable
 fun ParkingLotCardContent(
     parkingLotData: ParkingLotData,
+    onClickCard: () -> Unit = {},
+    onClickFavorite: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Text(
-            text = parkingLotData.name,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-        )
-        Text(
-            text = parkingLotData.address,
-            fontSize = 12.sp,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = parkingLotData.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = parkingLotData.address,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Icon(
+                painterResource(
+                    if (parkingLotData.favorite) R.drawable.ic_star_filled
+                    else R.drawable.ic_star_border
+                ),
+                contentDescription = null,
+                tint = if (parkingLotData.favorite) Color(0xFFFFCA00) else Theme.colors.line,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onClickFavorite)
+            )
+        }
         Text(
             text = buildAnnotatedString {
                 append("10분당 ")

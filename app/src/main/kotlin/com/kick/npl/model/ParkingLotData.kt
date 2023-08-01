@@ -32,7 +32,6 @@ data class ParkingLotData(
 
 fun ParkingLotData.toParkingLotEntity() : ParkingLotEntity {
     return ParkingLotEntity(
-        id = id,
         name = name,
         isBlocked = false,
         isOccupied = false,

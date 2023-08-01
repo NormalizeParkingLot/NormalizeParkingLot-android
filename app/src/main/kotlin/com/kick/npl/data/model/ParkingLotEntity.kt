@@ -7,8 +7,6 @@ import com.kick.npl.model.ParkingLotType
 import com.naver.maps.geometry.LatLng
 
 data class ParkingLotEntity(
-    @PropertyName("id")
-    val id: String = "",
     @PropertyName("name")
     val name: String = "",
     @PropertyName("isBlocked")
@@ -23,7 +21,7 @@ data class ParkingLotEntity(
     val latlng: GeoPoint = GeoPoint(0.0, 0.0),
 )
 
-fun ParkingLotEntity.toParkingLotData(): ParkingLotData {
+fun ParkingLotEntity.toParkingLotData(id: String): ParkingLotData {
     return ParkingLotData(
         id = id,
         name = name,

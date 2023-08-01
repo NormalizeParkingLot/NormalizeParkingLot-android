@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kick.npl.data.repository.MapsRepository
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -37,8 +39,8 @@ class MapViewModel @Inject constructor(
     private val parkingLotsRepository: ParkingLotsRepository,
 ) : ViewModel() {
 
-    private var _parkingLots: MutableStateFlow<List<ParkingLotData>> = MutableStateFlow(emptyList())
-    val parkingLots: StateFlow<List<ParkingLotData>> = _parkingLots.asStateFlow()
+    private var parkingLots = mutableStateMapOf<String, ParkingLotData>()
+    val parkingLotList: List<ParkingLotData> get() = parkingLots.values.toList()
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -47,20 +49,20 @@ class MapViewModel @Inject constructor(
 
     val cameraPositionState = CameraPositionState()
 
-    val filterMap = mutableStateMapOf<ParkingLotType, Boolean>()
-
     var parkingDateTime by mutableStateOf(
         ParkingDateTime(LocalDateTime.now(), LocalDateTime.now().plusHours(2))
     )
+        private set
 
     var selectedParkingLot by mutableStateOf<SelectedParkingLotData?>(null)
         private set
 
     init {
-        ParkingLotType.values().forEach { filterMap[it] = false }
         // Mock
         viewModelScope.launch {
-            _parkingLots.value = parkingLotsRepository.getAllParkingLots() ?: emptyList()
+            parkingLotsRepository.getAllParkingLots()?.forEach {
+                parkingLots[it.id] = it
+            }
         }
     }
 
@@ -78,8 +80,9 @@ class MapViewModel @Inject constructor(
 
     @OptIn(ExperimentalNaverMapApi::class)
     fun onMarkerClicked(
-        parkingLotData: ParkingLotData,
+        parkingLotId: String,
     ) = viewModelScope.launch(Dispatchers.IO) {
+        val parkingLotData = parkingLots[parkingLotId] ?: return@launch
 
         selectedParkingLot = SelectedParkingLotData(
             parkingLotData = parkingLotData,
@@ -96,8 +99,7 @@ class MapViewModel @Inject constructor(
         val (leftBottom, rightTop) = route.summary.getBounds()
         cameraPositionState.animate(
             update = CameraUpdate.fitBounds(
-                LatLngBounds(leftBottom, rightTop),
-                200, 200, 200, 500
+                LatLngBounds(leftBottom, rightTop), 200, 300, 200, 500
             )
         )
     }
@@ -107,18 +109,34 @@ class MapViewModel @Inject constructor(
         goal: LatLng,
         waypoints: List<LatLng> = emptyList(),
     ) = withContext(viewModelScope.coroutineContext) {
-        mapsRepository
-            .getDrivingRoute(start, goal, waypoints)
-            .onFailure {
-                _eventFlow.emit(UiEvent.Error("문제가 발생했습니다."))
-                Log.e("OrderDetailViewModel", it.message ?: "")
-                it.printStackTrace()
-            }
-            .getOrNull()
+        mapsRepository.getDrivingRoute(start, goal, waypoints).onFailure {
+            _eventFlow.emit(UiEvent.Error("문제가 발생했습니다."))
+            Log.e("OrderDetailViewModel", it.message ?: "")
+            it.printStackTrace()
+        }.getOrNull()
     }
 
-    fun onFilterSelected(filterType: ParkingLotType) {
-        filterMap[filterType] = !(filterMap[filterType] ?: false)
+
+    fun onClickFavorite(parkingLotId: String) = viewModelScope.launch(Dispatchers.IO) {
+        val parkingLotData = parkingLots[parkingLotId] ?: return@launch
+
+        parkingLotsRepository.toggleFavorite(
+            id = parkingLotId, favorite = !parkingLotData.favorite
+        )
+
+        parkingLots = parkingLots.apply {
+            this[parkingLotId] = parkingLotData.copy(favorite = !parkingLotData.favorite)
+        }
+
+        if (selectedParkingLot?.parkingLotData?.id == parkingLotId) {
+            selectedParkingLot = selectedParkingLot?.copy(
+                parkingLotData = parkingLots[parkingLotId] ?: return@launch
+            )
+        }
+    }
+
+    fun onClickParkingLotCard(parkingLotId: String) {
+        val parkingLotData = parkingLots[parkingLotId] ?: return
     }
 
     sealed class UiEvent {

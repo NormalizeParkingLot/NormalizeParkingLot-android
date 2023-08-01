@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.zIndex
 import com.kick.npl.R
 import com.kick.npl.model.ParkingLotData
@@ -48,6 +49,7 @@ import com.naver.maps.map.compose.MapProperties
 import com.naver.maps.map.compose.MapType
 import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.Marker
+import com.naver.maps.map.compose.MarkerDefaults
 import com.naver.maps.map.compose.MarkerState
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.PathOverlay
@@ -63,9 +65,11 @@ fun MapScreen(
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     parkingDateTime: ParkingDateTime,
     onMarkerUnselected: () -> Unit = {},
-    onParkingLotMarkerClicked: (ParkingLotData) -> Unit = {},
+    onParkingLotMarkerClicked: (String) -> Unit = {},
     onLocationChange: (Location) -> Unit = {},
     onParkingDateTimeChanged: (ParkingDateTime) -> Unit = {},
+    onClickFavorite: (String) -> Unit = {},
+    onClickParkingLotCard: (String) -> Unit = {},
 ) = Column(
     modifier = Modifier.fillMaxSize()
 ) {
@@ -98,7 +102,8 @@ fun MapScreen(
                     ParkingLotCard(
                         parkingLotData = parkingLotData,
                         haveBorder = true,
-                        modifier = Modifier.padding(horizontal = 12.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        onClickFavorite = { onClickFavorite(parkingLotData.id) }
                     )
                 }
             }
@@ -110,7 +115,9 @@ fun MapScreen(
                 cameraPositionState,
                 onParkingLotMarkerClicked,
                 onMarkerUnselected,
-                onLocationChange
+                onLocationChange,
+                onClickFavorite,
+                onClickParkingLotCard
             )
         }
     )
@@ -122,9 +129,11 @@ fun MapScreenContent(
     parkingLotList: List<ParkingLotData>,
     selectedParkingLot: SelectedParkingLotData?,
     cameraPositionState: CameraPositionState,
-    onParkingLotMarkerClicked: (ParkingLotData) -> Unit,
+    onParkingLotMarkerClicked: (String) -> Unit,
     onMarkerUnselected: () -> Unit,
     onLocationChange: (Location) -> Unit,
+    onClickFavorite: (String) -> Unit = {},
+    onClickParkingLotCard: (String) -> Unit = {},
 ) {
     Box {
         AnimatedVisibility(
@@ -135,9 +144,12 @@ fun MapScreenContent(
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 85.dp)
         ) {
+            val id = selectedParkingLot?.parkingLotData?.id
             ParkingLotCard(
                 selectedParkingLot?.parkingLotData,
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier.padding(horizontal = 12.dp),
+                onClickFavorite = { if(id != null) onClickFavorite(id) },
+                onClickCard = { if(id != null) onClickParkingLotCard(id) }
             )
         }
 
@@ -214,23 +226,26 @@ fun MapScreenContent(
                 val isSelected = selectedParkingLot?.parkingLotData?.id == parkingLotData.id
                 val animatedSize by animateFloatAsState(
                     label = "marker size multiplier",
-                    targetValue = if(isSelected) 1.3f else 1f
+                    targetValue = if(isSelected) 1.2f else 0.9f
                 )
 
                 Marker(
-                    width =  (animatedSize * 35).dp,
-                    height = (animatedSize * 38).dp,
+                    width = (animatedSize * 44).dp,
+                    height = (animatedSize * 55).dp,
                     zIndex = if(isSelected) 2 else 0,
-                    icon = OverlayImage.fromResource(R.drawable.ic_marker),
+                    icon = OverlayImage.fromResource(
+                        when(isSelected) {
+                            true -> R.drawable.ic_marker_selected
+                            false -> R.drawable.ic_marker_circle
+                        }
+                    ),
                     iconTintColor = Theme.colors.primary,
                     state = MarkerState(parkingLotData.latLng),
                     captionMinZoom = 11.0,
                     subCaptionMinZoom = 11.0,
                     captionText = parkingLotData.name,
-                    subCaptionText = "${parkingLotData.pricePer10min}원/10분"
-                        .takeIf { selectedParkingLot == null },
                     onClick = {
-                        onParkingLotMarkerClicked(parkingLotData)
+                        onParkingLotMarkerClicked(parkingLotData.id)
                         true
                     }
                 )
