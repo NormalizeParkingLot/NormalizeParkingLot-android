@@ -1,5 +1,6 @@
 package com.kick.npl.ui.common
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
@@ -17,11 +18,22 @@ import kotlinx.coroutines.launch
 @Composable
 fun BottomSheet(
     peekHeight: Dp = 56.dp,
-    sheetContent: @Composable (onExpanded: () -> Unit) -> Unit,
+    onExpanded: () -> Unit = {},
+    sheetContent: @Composable ColumnScope.() -> Unit,
     content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            confirmValueChange = {
+                when (it) {
+                    SheetValue.Expanded -> onExpanded()
+                    else -> Unit
+                }
+                true
+            }
+        ),
+    )
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
@@ -30,14 +42,8 @@ fun BottomSheet(
         sheetPeekHeight = peekHeight,
         sheetContainerColor = Theme.colors.background,
         sheetContentColor = Theme.colors.onBackground0,
-        sheetContent = {
-            sheetContent {
-                scope.launch {
-                    bottomSheetScaffoldState.bottomSheetState.expand()
-                }
-            }
-        },
+        sheetContent = sheetContent,
     ) {
-        content ()
+        content()
     }
 }

@@ -93,6 +93,7 @@ fun MapScreen(
     )
 
     BottomSheet(
+        onExpanded = onMarkerUnselected,
         sheetContent = {
             LazyColumn(
                 modifier = Modifier.padding(bottom = 16.dp),

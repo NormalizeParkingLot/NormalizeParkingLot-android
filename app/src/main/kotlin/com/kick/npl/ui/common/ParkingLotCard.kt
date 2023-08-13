@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.kick.npl.R
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.model.ParkingLotType
@@ -69,7 +73,7 @@ fun ParkingLotCard(
     onClickCard: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
 ) = Card(
-    modifier = modifier.fillMaxWidth(),
+    modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 100.dp),
     shape = CardDefaults.elevatedShape,
     colors = CardDefaults.elevatedCardColors(
         containerColor = Theme.colors.surface,
@@ -83,14 +87,16 @@ fun ParkingLotCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(60.dp)
-                .border(
-                    1.dp, Color.Gray, RoundedCornerShape(4.dp)
-                )
-        )
         parkingLotData?.let { parkingLotData ->
+            AsyncImage(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .size(68.dp),
+//                model = parkingLotData.imageUri,
+                model = "https://mediahub.seoul.go.kr/uploads/mediahub/2022/02/uZmjEIGLXJCxhjAVQoPvTClPSIkOCIyN.png",
+                contentScale = ContentScale.Crop,
+                contentDescription = parkingLotData.name,
+            )
             ParkingLotCardContent(
                 parkingLotData = parkingLotData,
                 onClickCard = onClickCard,
