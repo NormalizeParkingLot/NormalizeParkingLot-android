@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -22,7 +23,7 @@ fun NPLApp(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
                 Column {
-                    Divider(color = Theme.colors.secondaryLine)
+                    HorizontalDivider(color = Theme.colors.secondaryLine)
                     NPLBottomNavBar(navController = appState.navController)
                 }
             },
@@ -34,13 +35,5 @@ fun NPLApp(
                 modifier = Modifier.padding(contentPadding),
             )
         }
-    }
-}
-
-@Preview
-@Composable
-fun NPLAppPreview() {
-    NPLTheme {
-        NPLApp()
     }
 }
