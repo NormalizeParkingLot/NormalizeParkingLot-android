@@ -91,4 +91,34 @@ class ParkingLotsRepositoryImpl @Inject constructor(
                 }
         }
     }
+
+    override suspend fun deleteTestParkingLot(id: String) {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            fireStore.module()
+                .document(id)
+                .delete()
+                .addOnSuccessListener {
+                    cancellableContinuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    cancellableContinuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    override suspend fun setIsBlocked(id: String, isBlocked: Boolean) {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            fireStore.module()
+                .document(id)
+                .update(
+                    "isBlocked", isBlocked
+                )
+                .addOnSuccessListener {
+                    cancellableContinuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    cancellableContinuation.resumeWithException(exception)
+                }
+        }
+    }
 }
