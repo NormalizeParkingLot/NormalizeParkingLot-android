@@ -1,6 +1,7 @@
 package com.kick.npl.ui.map
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,6 +32,10 @@ fun NavGraphBuilder.mapGraph(
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.getAllParkingLots()
+    }
+
     MapScreen(
         parkingLotList = viewModel.parkingLotList,
         selectedParkingLot = viewModel.selectedParkingLot,

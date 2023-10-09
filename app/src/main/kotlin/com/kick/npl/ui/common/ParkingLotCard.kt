@@ -92,8 +92,7 @@ fun ParkingLotCard(
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
                     .size(68.dp),
-//                model = parkingLotData.imageUri,
-                model = "https://mediahub.seoul.go.kr/uploads/mediahub/2022/02/uZmjEIGLXJCxhjAVQoPvTClPSIkOCIyN.png",
+                model = parkingLotData.imageUri,
                 contentScale = ContentScale.Crop,
                 contentDescription = parkingLotData.name,
             )

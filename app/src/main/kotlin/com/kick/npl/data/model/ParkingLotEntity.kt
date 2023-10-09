@@ -27,7 +27,7 @@ fun ParkingLotEntity.toParkingLotData(id: String): ParkingLotData {
         name = name,
         address = "테스트",
         addressDetail = "테스트",
-        imageUri = "https://naver.com",
+        imageUri = imageUri,
         latLng = LatLng(latlng.latitude, latlng.longitude),
         favorite = false,
         pricePer10min = price,

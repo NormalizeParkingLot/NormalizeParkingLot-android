@@ -36,7 +36,7 @@ fun ParkingLotData.toParkingLotEntity() : ParkingLotEntity {
         isBlocked = false,
         isOccupied = false,
         price = pricePer10min,
-        imageUri = "test",
+        imageUri = imageUri,
         latlng = GeoPoint(latLng.latitude, latLng.longitude),
     )
 }

@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kick.npl.ui.map.mapGraph
+import com.kick.npl.ui.setting.settingGraph
 
 @Composable
 fun NPLNavHost(
@@ -27,7 +28,7 @@ fun NPLNavHost(
     mapGraph(navController)
     favoriteGraph()
     testGraph()
-    settingGraph()
+    settingGraph(navController)
 }
 
 fun NavGraphBuilder.favoriteGraph() {
@@ -36,9 +37,5 @@ fun NavGraphBuilder.favoriteGraph() {
 }
 fun NavGraphBuilder.testGraph() {
     composable(NPLBottomRoute.Provider.route) {
-    }
-}
-fun NavGraphBuilder.settingGraph() {
-    composable(NPLBottomRoute.Setting.route) {
     }
 }

@@ -353,4 +353,28 @@ fun generateSampleParkingLots(): List<ParkingLotData> = buildList {
         parkingLotType = ParkingLotType.TYPE_A
     ).let { add(it) }
 
+    ParkingLotData(
+        id = "32",
+        name = "부산대학교 제도관 주차장",
+        address = "서울특별시 서초구 서초동 1376-1",
+        addressDetail = "lacus",
+        imageUri = "quas",
+        latLng = LatLng(35.230876642140956, 129.0822235741259),
+        favorite = false,
+        pricePer10min = 1500,
+        parkingLotType = ParkingLotType.TYPE_A
+    ).let { add(it) }
+
+    ParkingLotData(
+        id = "33",
+        name = "부산대학교 도서관 주차장",
+        address = "서울특별시 서초구 서초동 1376-1",
+        addressDetail = "lacus",
+        imageUri = "quas",
+        latLng = LatLng(35.23574428670318, 129.08135401107754),
+        favorite = false,
+        pricePer10min = 2000,
+        parkingLotType = ParkingLotType.TYPE_A
+    ).let { add(it) }
+
 }

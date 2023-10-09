@@ -22,6 +22,7 @@ import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,12 +58,9 @@ class MapViewModel @Inject constructor(
     var selectedParkingLot by mutableStateOf<SelectedParkingLotData?>(null)
         private set
 
-    init {
-        // Mock
-        viewModelScope.launch {
-            parkingLotsRepository.getAllParkingLots()?.forEach {
-                parkingLots[it.id] = it
-            }
+    fun getAllParkingLots() = viewModelScope.launch(Dispatchers.IO) {
+        parkingLotsRepository.getAllParkingLots()?.forEach {
+            parkingLots[it.id] = it
         }
     }
 
