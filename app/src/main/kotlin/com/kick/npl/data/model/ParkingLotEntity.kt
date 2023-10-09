@@ -19,6 +19,8 @@ data class ParkingLotEntity(
     val imageUri: String = "",
     @PropertyName("latlng")
     val latlng: GeoPoint = GeoPoint(0.0, 0.0),
+    @PropertyName("favorite")
+    val favorite: Boolean = false,
 )
 
 fun ParkingLotEntity.toParkingLotData(id: String): ParkingLotData {
@@ -29,7 +31,7 @@ fun ParkingLotEntity.toParkingLotData(id: String): ParkingLotData {
         addressDetail = "테스트",
         imageUri = imageUri,
         latLng = LatLng(latlng.latitude, latlng.longitude),
-        favorite = false,
+        favorite = favorite,
         pricePer10min = price,
         parkingLotType = ParkingLotType.TYPE_A
     )

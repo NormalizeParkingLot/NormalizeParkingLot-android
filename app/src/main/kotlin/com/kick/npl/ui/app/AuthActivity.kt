@@ -80,8 +80,8 @@ class AuthActivity : ComponentActivity() {
                 }
 
                 AuthScreen(
-                    loginWithKakaoAccount = { viewModel.loginWithKakaoTalk(context) },
-                    loginWithKakaoTalk = { viewModel.loginWithKakaoAccount(context) },
+                    loginWithKakaoAccount = { viewModel.loginWithKakaoAccount(context) },
+                    loginWithKakaoTalk = { viewModel.loginWithKakaoTalk(context) },
                 )
             }
         }
@@ -142,13 +142,7 @@ private fun AuthScreen(
                         shape = RoundedCornerShape(24.dp)
                     )
                     .padding(16.dp)
-                    .noRippleClickable {
-                        if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
-                            loginWithKakaoTalk()
-                        } else {
-                            loginWithKakaoAccount()
-                        }
-                    },
+                    .noRippleClickable(loginWithKakaoTalk),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(

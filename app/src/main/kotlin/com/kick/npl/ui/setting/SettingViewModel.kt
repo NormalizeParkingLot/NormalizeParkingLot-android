@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kakao.sdk.user.UserApiClient
 import com.kick.npl.data.model.toParkingLotData
 import com.kick.npl.data.repository.ParkingLotsRepository
 import com.kick.npl.model.ParkingLotData
@@ -80,5 +81,13 @@ class SettingViewModel @Inject constructor(
             }
         _toastMessage.send("Mock data generated")
         isLoading = false
+    }
+
+    fun logout() {
+        viewModelScope.launch(Dispatchers.IO) {
+            UserApiClient.instance.logout { error ->
+                error?.printStackTrace()
+            }
+        }
     }
 }

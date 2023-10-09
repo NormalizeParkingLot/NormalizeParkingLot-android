@@ -16,7 +16,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kick.npl.ui.app.NPLBottomRoute
-import com.kick.npl.ui.map.MapRoute
 import com.kick.npl.ui.theme.Theme
 
 const val SETTING_SCREEN = "settingScreen"
@@ -60,6 +59,7 @@ fun SettingRoute(
             updateField = viewModel::updateField,
             mockTestData = viewModel::mockData,
             deleteTestData = viewModel::deleteAllTestParkingLots,
+            logout = viewModel::logout,
         )
     }
 }

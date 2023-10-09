@@ -35,7 +35,7 @@ class AuthViewModel @Inject constructor(
                         error.printStackTrace()
                         onSignInFailure()
                     }
-                } else if(token != null) {
+                } else if (token != null) {
                     onSignInSuccess(token)
                 }
             }
@@ -46,15 +46,13 @@ class AuthViewModel @Inject constructor(
 
     fun loginWithKakaoAccount(context: Context) {
         UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
-            viewModelScope.launch(Dispatchers.IO) {
-                if (error != null) {
-                    error.printStackTrace()
-                    onSignInFailure()
-                } else if (token == null) {
-                    onSignInFailure("사용자 토큰이 존재하지 않습니다")
-                } else {
-                    onSignInSuccess(token)
-                }
+            if (error != null) {
+                error.printStackTrace()
+                onSignInFailure()
+            } else if (token == null) {
+                onSignInFailure("사용자 토큰이 존재하지 않습니다")
+            } else {
+                onSignInSuccess(token)
             }
         }
     }

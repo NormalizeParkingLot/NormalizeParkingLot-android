@@ -60,6 +60,7 @@ class MapViewModel @Inject constructor(
 
     fun getAllParkingLots() = viewModelScope.launch(Dispatchers.IO) {
         parkingLotsRepository.getAllParkingLots()?.forEach {
+            Log.d("TEST", "getAllParkingLots: $it")
             parkingLots[it.id] = it
         }
     }
