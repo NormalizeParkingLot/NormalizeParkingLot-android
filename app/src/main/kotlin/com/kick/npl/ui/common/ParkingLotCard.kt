@@ -114,6 +114,7 @@ fun ParkingLotCardContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .noRippleClickable { onClickCard() }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth()

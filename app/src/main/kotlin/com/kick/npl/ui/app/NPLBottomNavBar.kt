@@ -29,7 +29,7 @@ fun NPLBottomNavBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    NPLBottomRoute.values().forEachIndexed { index, item ->
+    NPLBottomRoute.entries.forEachIndexed { index, item ->
         val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
 
         NavigationBarItem(

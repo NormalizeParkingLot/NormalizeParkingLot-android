@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kick.npl.ui.favorite.favoriteGraph
 import com.kick.npl.ui.map.mapGraph
+import com.kick.npl.ui.parkinglot.parkingLotGraph
 import com.kick.npl.ui.setting.settingGraph
 
 @Composable
@@ -27,9 +28,10 @@ fun NPLNavHost(
     popExitTransition = { ExitTransition.None },
 ) {
     mapGraph(navController)
-    favoriteGraph()
+    favoriteGraph(navController)
     testGraph()
     settingGraph(navController)
+    parkingLotGraph(navController)
 }
 
 fun NavGraphBuilder.testGraph() {

@@ -1,6 +1,5 @@
 package com.kick.npl.ui.favorite
 
-import android.widget.ProgressBar
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,38 +10,40 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
-import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.ui.app.NPLBottomRoute
 import com.kick.npl.ui.common.ParkingLotCard
+import com.kick.npl.ui.parkinglot.navigateToParkingLotDetail
 import com.kick.npl.ui.theme.Theme
 
-fun NavGraphBuilder.favoriteGraph() {
+fun NavGraphBuilder.favoriteGraph(navController: NavController) {
     composable(NPLBottomRoute.Favorite.route) {
-        FavoriteRoute()
+        FavoriteRoute(
+            onClickCard = { parkingLotData ->
+                navController.navigateToParkingLotDetail(parkingLotData)
+            }
+        )
     }
 }
 
 @Composable
 fun FavoriteRoute(
+    onClickCard: (ParkingLotData) -> Unit,
     viewModel: FavoriteViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(Unit) {
@@ -54,6 +55,7 @@ fun FavoriteRoute(
         isLoading = isLoading,
         parkingLotList = viewModel.favoriteParkingLots,
         onClickFavorite = viewModel::onClickFavorite,
+        onClickCard = onClickCard,
     )
 }
 
@@ -62,6 +64,7 @@ fun FavoriteScreen(
     isLoading: Boolean,
     parkingLotList: List<ParkingLotData>,
     onClickFavorite: (ParkingLotData) -> Unit,
+    onClickCard: (ParkingLotData) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -105,7 +108,8 @@ fun FavoriteScreen(
                             parkingLotData = parkingLotData,
                             haveBorder = true,
                             modifier = Modifier.padding(horizontal = 12.dp),
-                            onClickFavorite = { onClickFavorite(parkingLotData) }
+                            onClickFavorite = { onClickFavorite(parkingLotData) },
+                            onClickCard = { onClickCard(parkingLotData) }
                         )
                     }
                 }

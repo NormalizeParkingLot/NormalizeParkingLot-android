@@ -1,15 +1,17 @@
 package com.kick.npl.ui.map
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.kick.npl.model.ParkingLotData
 import com.kick.npl.ui.app.NPLBottomRoute
+import com.kick.npl.ui.parkinglot.navigateToParkingLotDetail
 
 const val MAP_SCREEN = "mapScreen"
 
@@ -23,17 +25,36 @@ fun NavGraphBuilder.mapGraph(
         composable(
             route = MAP_SCREEN,
         ) {
-            MapRoute()
+            MapRoute(
+                navigateToParkingLotDetail = navController::navigateToParkingLotDetail
+            )
         }
     }
 }
 
 @Composable
 fun MapRoute(
+    navigateToParkingLotDetail: (ParkingLotData) -> Unit,
     viewModel: MapViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         viewModel.getAllParkingLots()
+    }
+
+    LaunchedEffect(viewModel.eventFlow) {
+        viewModel.eventFlow.collect {
+            when(it) {
+                is MapViewModel.UiEvent.Error -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
+                is MapViewModel.UiEvent.NavigateToDetail -> {
+                    navigateToParkingLotDetail(it.parkingLotData)
+                }
+                MapViewModel.UiEvent.FullSizeMap -> Unit
+            }
+        }
     }
 
     MapScreen(

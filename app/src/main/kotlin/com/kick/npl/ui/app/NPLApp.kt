@@ -22,9 +22,11 @@ fun NPLApp(
         Scaffold (
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
-                Column {
-                    HorizontalDivider(color = Theme.colors.secondaryLine)
-                    NPLBottomNavBar(navController = appState.navController)
+                if(appState.shouldShowBar) {
+                    Column {
+                        HorizontalDivider(color = Theme.colors.secondaryLine)
+                        NPLBottomNavBar(navController = appState.navController)
+                    }
                 }
             },
             containerColor = Theme.colors.background,

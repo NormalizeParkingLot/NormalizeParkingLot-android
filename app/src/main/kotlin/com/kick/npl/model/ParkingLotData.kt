@@ -1,9 +1,12 @@
 package com.kick.npl.model
 
+import android.os.Parcelable
 import com.google.firebase.firestore.GeoPoint
 import com.kick.npl.data.model.ParkingLotEntity
 import com.naver.maps.geometry.LatLng
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class ParkingLotData(
     val id: String,
     val name: String,
@@ -14,7 +17,7 @@ data class ParkingLotData(
     val favorite: Boolean,
     val pricePer10min: Int,
     val parkingLotType: ParkingLotType,
-) {
+) : Parcelable {
     companion object {
         val TEST = ParkingLotData(
             id = "",
