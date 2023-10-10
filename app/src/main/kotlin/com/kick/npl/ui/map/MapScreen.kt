@@ -28,6 +28,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +60,7 @@ import com.naver.maps.map.compose.PathOverlay
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
 import com.naver.maps.map.overlay.OverlayImage
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 @Composable
@@ -76,6 +78,7 @@ fun MapScreen(
 ) = Column(
     modifier = Modifier.fillMaxSize()
 ) {
+    val scope = rememberCoroutineScope()
     var isTimePickerVisible by remember { mutableStateOf(false) }
 
     DateTimePickerBottomSheet(
@@ -97,7 +100,7 @@ fun MapScreen(
 
     BottomSheet(
         onExpanded = onMarkerUnselected,
-        sheetContent = {
+        sheetContent = { hide ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -110,7 +113,11 @@ fun MapScreen(
                         parkingLotData = parkingLotData,
                         haveBorder = true,
                         modifier = Modifier.padding(horizontal = 12.dp),
-                        onClickFavorite = { onClickFavorite(parkingLotData.id) }
+                        onClickFavorite = { onClickFavorite(parkingLotData.id) },
+                        onClickCard = {
+                            onParkingLotMarkerClicked(parkingLotData.id)
+                            scope.launch { hide() }
+                        }
                     )
                 }
             }

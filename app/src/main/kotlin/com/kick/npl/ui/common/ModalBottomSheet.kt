@@ -18,10 +18,9 @@ import com.kick.npl.ui.theme.Theme
 fun BottomSheet(
     peekHeight: Dp = 56.dp,
     onExpanded: () -> Unit = {},
-    sheetContent: @Composable ColumnScope.() -> Unit,
-    content: @Composable () -> Unit,
+    sheetContent: @Composable ColumnScope.(hide: suspend () -> Unit) -> Unit,
+    content: @Composable (hide: suspend () -> Unit) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             confirmValueChange = {
@@ -30,7 +29,7 @@ fun BottomSheet(
                     else -> Unit
                 }
                 true
-            }
+            },
         ),
     )
 
@@ -41,8 +40,14 @@ fun BottomSheet(
         sheetPeekHeight = peekHeight,
         sheetContainerColor = Theme.colors.background,
         sheetContentColor = Theme.colors.onBackground0,
-        sheetContent = sheetContent,
+        sheetContent = {
+            sheetContent {
+                bottomSheetScaffoldState.bottomSheetState.partialExpand()
+            }
+        },
     ) {
-        content()
+        content {
+            bottomSheetScaffoldState.bottomSheetState.partialExpand()
+        }
     }
 }
