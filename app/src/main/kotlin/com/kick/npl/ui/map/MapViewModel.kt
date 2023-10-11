@@ -137,13 +137,16 @@ class MapViewModel @Inject constructor(
     fun onClickParkingLotCard(parkingLotId: String) {
         viewModelScope.launch {
             val parkingLotData = parkingLots[parkingLotId] ?: return@launch
-            _eventFlow.emit(UiEvent.NavigateToDetail(parkingLotData))
+            _eventFlow.emit(UiEvent.NavigateToDetail(parkingLotData, parkingDateTime))
         }
     }
 
     sealed class UiEvent {
         data class Error(val message: String) : UiEvent()
-        data class NavigateToDetail(val parkingLotData: ParkingLotData) : UiEvent()
+        data class NavigateToDetail(
+            val parkingLotData: ParkingLotData,
+            val parkingDateTime: ParkingDateTime
+        ) : UiEvent()
         data object FullSizeMap : UiEvent()
     }
 }

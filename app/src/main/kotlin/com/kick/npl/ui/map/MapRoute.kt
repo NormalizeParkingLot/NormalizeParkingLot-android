@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.ui.app.NPLBottomRoute
+import com.kick.npl.ui.map.model.ParkingDateTime
 import com.kick.npl.ui.parkinglot.navigateToParkingLotDetail
 
 const val MAP_SCREEN = "mapScreen"
@@ -34,7 +35,7 @@ fun NavGraphBuilder.mapGraph(
 
 @Composable
 fun MapRoute(
-    navigateToParkingLotDetail: (ParkingLotData) -> Unit,
+    navigateToParkingLotDetail: (ParkingLotData, ParkingDateTime) -> Unit,
     viewModel: MapViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -50,7 +51,7 @@ fun MapRoute(
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                 }
                 is MapViewModel.UiEvent.NavigateToDetail -> {
-                    navigateToParkingLotDetail(it.parkingLotData)
+                    navigateToParkingLotDetail(it.parkingLotData, it.parkingDateTime)
                 }
                 MapViewModel.UiEvent.FullSizeMap -> Unit
             }
