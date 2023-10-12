@@ -236,7 +236,9 @@ private fun BasicInfoSection(parkingLotData: ParkingLotData) {
                 text = "주차요금",
                 style = Theme.typo.subheadB,
                 color = Theme.colors.onSurface40,
-                modifier = Modifier.padding(top = 2.dp).padding(start = 4.dp)
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .padding(start = 4.dp)
             )
             Text(
                 text = buildAnnotatedString {
@@ -343,9 +345,7 @@ private fun PeriodSection(parkingDateTime: ParkingDateTime) {
                 contentDescription = null,
                 tint = Theme.colors.onSurface0,
             )
-            Row(
-                modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Column{
                 val start = parkingDateTime.startTime
                 val end = parkingDateTime.endTime
                 Text(
@@ -353,6 +353,7 @@ private fun PeriodSection(parkingDateTime: ParkingDateTime) {
                     fontSize = 13.sp,
                     color = Theme.colors.onSurface0,
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = Duration.between(start, end).toUserFriendlyString(),
                     fontSize = 13.sp,

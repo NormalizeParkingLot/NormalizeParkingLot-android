@@ -4,11 +4,10 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import com.kick.npl.ui.favorite.favoriteGraph
+import com.kick.npl.ui.manage.managingGraph
 import com.kick.npl.ui.map.mapGraph
 import com.kick.npl.ui.parkinglot.parkingLotGraph
 import com.kick.npl.ui.setting.settingGraph
@@ -29,12 +28,7 @@ fun NPLNavHost(
 ) {
     mapGraph(navController)
     favoriteGraph(navController)
-    testGraph()
+    managingGraph(navController)
     settingGraph(navController)
     parkingLotGraph(navController)
-}
-
-fun NavGraphBuilder.testGraph() {
-    composable(NPLBottomRoute.Provider.route) {
-    }
 }

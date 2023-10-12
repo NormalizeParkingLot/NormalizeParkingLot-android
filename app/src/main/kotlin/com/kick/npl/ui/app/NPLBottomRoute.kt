@@ -10,6 +10,6 @@ enum class NPLBottomRoute(
 ) {
     Map("map", "지도", R.drawable.ic_map),
     Favorite("favorite", "즐겨찾기", R.drawable.ic_star_filled),
-    Provider("provider", "제공자용", R.drawable.ic_setting),
+    Managing("managing", "관리", R.drawable.ic_setting),
     Setting("setting", "더보기", R.drawable.ic_setting)
 }

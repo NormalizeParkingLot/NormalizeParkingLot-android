@@ -8,6 +8,8 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.kick.npl.ui.manage.ADD_PARKING_LOT_ROUTE
+import com.kick.npl.ui.manage.BARCODE_SCAN_ROUTE
 import com.kick.npl.ui.parkinglot.PARKING_LOT_DETAIL
 import kotlinx.coroutines.CoroutineScope
 
@@ -35,7 +37,10 @@ class NPLAppState(
     val shouldShowBar: Boolean
         @Composable get() = navController
             .currentBackStackEntryAsState().value?.destination?.route !in listOf(
-                PARKING_LOT_DETAIL
+                PARKING_LOT_DETAIL,
+                BARCODE_SCAN_ROUTE,
+                ADD_PARKING_LOT_ROUTE,
+
             )
     fun upPress() = navController.navigateUp()
 }
