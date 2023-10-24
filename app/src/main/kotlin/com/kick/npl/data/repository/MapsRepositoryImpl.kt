@@ -28,9 +28,11 @@ class MapsRepositoryImpl @Inject constructor(
                             .replace("특별", "")
                             .replace("시", "")
                         val area2 = region.area2.name
-                        "$area1 $area2"
+                        val area3 = region.area3.name
+                        val area4 = region.area4.name
+                        "$area1 $area2 $area3 $area4"
                     }
-                else throw IOException(res.status.message)
+                else ""
             }
     }
 

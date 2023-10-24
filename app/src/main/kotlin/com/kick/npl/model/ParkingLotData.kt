@@ -38,8 +38,9 @@ fun ParkingLotData.toParkingLotEntity() : ParkingLotEntity {
         name = name,
         isBlocked = false,
         isOccupied = false,
-        price = pricePer10min,
-        imageUri = imageUri,
+        pricePer10min = pricePer10min,
+        imageUrl = imageUri,
         latlng = GeoPoint(latLng.latitude, latLng.longitude),
+        address = address,
     )
 }

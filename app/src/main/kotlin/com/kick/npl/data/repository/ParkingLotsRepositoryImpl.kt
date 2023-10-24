@@ -110,8 +110,27 @@ class ParkingLotsRepositoryImpl @Inject constructor(
         return suspendCancellableCoroutine { cancellableContinuation ->
             fireStore.module()
                 .document(id)
+                .update("isBlocked", isBlocked)
+                .addOnSuccessListener {
+                    cancellableContinuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    cancellableContinuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    override suspend fun setParkingLotData(parkingLotData: ParkingLotData) {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+
+            val parkingLotEntity = parkingLotData.toParkingLotEntity()
+            fireStore.module()
+                .document(parkingLotData.id)
                 .update(
-                    "isBlocked", isBlocked
+                    "latlng", parkingLotEntity.latlng,
+                    "name", parkingLotEntity.name,
+                    "address", parkingLotEntity.address,
+                    "price", parkingLotEntity.pricePer10min,
                 )
                 .addOnSuccessListener {
                     cancellableContinuation.resume(Unit)

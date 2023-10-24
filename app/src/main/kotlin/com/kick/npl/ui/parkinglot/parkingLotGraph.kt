@@ -57,7 +57,6 @@ fun NavGraphBuilder.parkingLotGraph(
                     parkingLotData = parkingLotData ?: run { popUp(); return@AnimatedContent },
                     parkingDateTime = parkingDateTime,
                     onClickClose = { navController.popBackStack() },
-                    onClickPayment = { navController.popBackStack() },
                 )
             }
         }

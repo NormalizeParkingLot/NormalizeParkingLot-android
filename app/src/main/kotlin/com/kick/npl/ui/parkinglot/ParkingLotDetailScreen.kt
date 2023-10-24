@@ -1,6 +1,8 @@
 package com.kick.npl.ui.parkinglot
 
 import android.view.Gravity
+import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -19,10 +21,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -41,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.kick.npl.R
 import com.kick.npl.model.ParkingLotData
@@ -68,8 +74,32 @@ fun ParkingLotDetailScreen(
     parkingLotData: ParkingLotData,
     parkingDateTime: ParkingDateTime?,
     onClickClose: () -> Unit,
-    onClickPayment: () -> Unit,
+    viewModel: ParkingLotDetailViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+    LaunchedEffect(viewModel.paymentResult) {
+        viewModel.result.collect {
+            when (it) {
+                is ParkingLotDetailViewModel.PaymentResult.Success -> {
+                    Toast.makeText(
+                        context,
+                        "주차장 대여 신청이 완료되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onClickClose()
+                }
+
+                is ParkingLotDetailViewModel.PaymentResult.Failure -> {
+                    Toast.makeText(
+                        context,
+                        it.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
     var isAllAgreed by remember { mutableStateOf(false) }
     val isPaymentEnable = parkingDateTime != null
     Column(
@@ -78,27 +108,52 @@ fun ParkingLotDetailScreen(
             .background(color = Theme.colors.background),
     ) {
         TopBar(onClickClose = onClickClose)
-        Box {
-            ParkingLotDetailContent(
-                parkingLotData,
-                parkingDateTime,
-                isAllAgreed,
-                onClickAgree = { isAllAgreed = it },
-                isAgreementEnable = isPaymentEnable,
-            )
-            FloatingButton(
-                price = if (isPaymentEnable) {
-                    (parkingLotData.pricePer10min * Duration.between(
-                        parkingDateTime!!.startTime,
-                        parkingDateTime.endTime
-                    ).toMinutes()).div(10)
-                } else {
-                    null
-                },
-                isEnabled = isAllAgreed,
-                modifier = Modifier.align(Alignment.BottomCenter),
-                onClickButton = if(isPaymentEnable) onClickPayment else onClickClose,
-            )
+
+        AnimatedContent(targetState = viewModel.isLoading, label = "") {
+            when (it) {
+                true -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Theme.colors.primary
+                        )
+                    }
+                }
+
+                false -> {
+                    Box {
+                        ParkingLotDetailContent(
+                            parkingLotData,
+                            parkingDateTime,
+                            isAllAgreed,
+                            onClickAgree = { isAllAgreed = it },
+                            isAgreementEnable = isPaymentEnable,
+                        )
+                        FloatingButton(
+                            price = if (isPaymentEnable) {
+                                (parkingLotData.pricePer10min * Duration.between(
+                                    parkingDateTime!!.startTime,
+                                    parkingDateTime.endTime
+                                ).toMinutes()).div(10)
+                            } else {
+                                null
+                            },
+                            isEnabled = isAllAgreed,
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            onClickButton = {
+                                if (isPaymentEnable) {
+                                    viewModel.updateField(parkingLotData.id, false)
+                                } else {
+                                    onClickClose()
+                                }
+                            },
+                        )
+                    }
+                }
+            }
 
         }
     }
@@ -345,7 +400,7 @@ private fun PeriodSection(parkingDateTime: ParkingDateTime) {
                 contentDescription = null,
                 tint = Theme.colors.onSurface0,
             )
-            Column{
+            Column {
                 val start = parkingDateTime.startTime
                 val end = parkingDateTime.endTime
                 Text(
@@ -536,7 +591,7 @@ fun PointSection(
             fontSize = 14.sp,
         )
         Spacer(modifier = Modifier.height(12.dp))
-        if(isAgreementEnable) {
+        if (isAgreementEnable) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = isAgreed, onCheckedChange = onClickAgree)
                 ClickableText(
