@@ -17,6 +17,8 @@ data class ParkingLotData(
     val favorite: Boolean,
     val pricePer10min: Int,
     val parkingLotType: ParkingLotType,
+    val isBlocked: Boolean = false,
+    val isOccupied: Boolean = false,
 ) : Parcelable {
     companion object {
         val TEST = ParkingLotData(
@@ -36,7 +38,7 @@ data class ParkingLotData(
 fun ParkingLotData.toParkingLotEntity() : ParkingLotEntity {
     return ParkingLotEntity(
         name = name,
-        isBlocked = false,
+        isBlocked = isBlocked,
         isOccupied = false,
         pricePer10min = pricePer10min,
         imageUrl = imageUri,

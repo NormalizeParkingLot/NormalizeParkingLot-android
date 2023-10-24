@@ -40,7 +40,7 @@ class MapViewModel @Inject constructor(
     private val parkingLotsRepository: ParkingLotsRepository,
 ) : ViewModel() {
 
-    private var parkingLots = mutableStateMapOf<String, ParkingLotData>()
+    private var parkingLots = mutableMapOf<String, ParkingLotData>()
     val parkingLotList: List<ParkingLotData> get() = parkingLots.values.toList()
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -58,11 +58,17 @@ class MapViewModel @Inject constructor(
     var selectedParkingLot by mutableStateOf<SelectedParkingLotData?>(null)
         private set
 
+    init {
+        getAllParkingLots()
+    }
+
     fun getAllParkingLots() = viewModelScope.launch(Dispatchers.IO) {
-        parkingLotsRepository.getAllParkingLots()?.forEach {
-            Log.d("TEST", "getAllParkingLots: $it")
-            parkingLots[it.id] = it
-        }
+        parkingLotsRepository.getAllParkingLots()
+            ?.asSequence()
+            ?.filter { it.name.isNotBlank() && it.isBlocked.not() }
+            ?.map { it.id to it }
+            ?.toMap()
+            ?.let { parkingLots = it.toMutableMap() }
     }
 
     fun onParkingDateTimeChanged(parkingDateTime: ParkingDateTime) {

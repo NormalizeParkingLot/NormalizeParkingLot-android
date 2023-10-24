@@ -46,6 +46,7 @@ fun ParkingLotEntity.toParkingLotData(id: String): ParkingLotData {
         latLng = LatLng(latlng.latitude, latlng.longitude),
         favorite = favorite,
         pricePer10min = pricePer10min,
-        parkingLotType = ParkingLotType.TYPE_A
+        parkingLotType = ParkingLotType.TYPE_A,
+        isBlocked = isBlocked
     )
 }

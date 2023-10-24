@@ -59,6 +59,7 @@ fun MapRoute(
     }
 
     MapScreen(
+        getAllParkingLots = viewModel::getAllParkingLots,
         parkingLotList = viewModel.parkingLotList,
         selectedParkingLot = viewModel.selectedParkingLot,
         cameraPositionState = viewModel.cameraPositionState,

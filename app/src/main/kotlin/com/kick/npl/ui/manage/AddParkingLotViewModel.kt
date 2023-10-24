@@ -45,6 +45,9 @@ class AddParkingLotViewModel @Inject constructor(
     fun registerParkingLot() {
         Log.d("TEST", "registerParkingLot: ${parkingLotData.value}")
         isLoading = true
+        parkingLotData.value = parkingLotData.value.copy(
+            imageUrl = "https://mediahub.seoul.go.kr/uploads/mediahub/2022/02/uZmjEIGLXJCxhjAVQoPvTClPSIkOCIyN.png",
+        )
         viewModelScope.launch(Dispatchers.IO) {
             parkingLotsRepository
                 .setParkingLot(parkingLotData.value.toParkingLotData())

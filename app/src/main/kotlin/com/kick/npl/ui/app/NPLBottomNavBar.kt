@@ -14,6 +14,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.kick.npl.ui.map.MAP_SCREEN
 import com.kick.npl.ui.theme.Theme
 
 @Composable
@@ -42,13 +43,18 @@ fun NPLBottomNavBar(
             label = { Text(item.title) },
             selected = selected,
             onClick = {
+
+                if(selected && item.route == NPLBottomRoute.Map.route) {
+//                    val startDestination = navController.graph.findStartDestination().route?
+//                    startDestination?.let { navController.navigate(it) }
+                    navController.popBackStack()
+                }
                 navController.navigate(item.route) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }
                     launchSingleTop = true
                     restoreState = true
-
                 }
             },
             colors = NavigationBarItemDefaults.colors(

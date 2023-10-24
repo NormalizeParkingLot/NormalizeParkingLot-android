@@ -65,6 +65,7 @@ import java.time.LocalDateTime
 
 @Composable
 fun MapScreen(
+    getAllParkingLots: () -> Unit,
     parkingLotList: List<ParkingLotData>,
     selectedParkingLot: SelectedParkingLotData? = null,
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
@@ -89,6 +90,7 @@ fun MapScreen(
         onClickConfirm = { startTime, endTime ->
             isTimePickerVisible = false
             onParkingDateTimeChanged(ParkingDateTime(startTime, endTime))
+            getAllParkingLots()
         },
     )
 

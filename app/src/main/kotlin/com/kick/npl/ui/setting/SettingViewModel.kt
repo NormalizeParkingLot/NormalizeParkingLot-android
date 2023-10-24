@@ -75,7 +75,8 @@ class SettingViewModel @Inject constructor(
                 parkingLotsRepository.setParkingLot(
                     data.copy(
                         id = "Test:${1000 + index}",
-                        imageUri = "https://i.imgur.com/nVutgKq.png"
+                        imageUri = "https://i.imgur.com/nVutgKq.png",
+                        isBlocked = false
                     )
                 )
             }
