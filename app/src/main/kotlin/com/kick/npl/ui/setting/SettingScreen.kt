@@ -1,5 +1,8 @@
 package com.kick.npl.ui.setting
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kick.npl.model.ParkingLotData
@@ -41,6 +45,7 @@ fun SettingScreen(
     mockTestData: () -> Unit = {},
     deleteTestData: () -> Unit = {},
     logout: () -> Unit = {},
+    reset: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -121,14 +126,34 @@ fun SettingScreen(
 
         NPLButton(
             buttonStyle = ButtonStyle.Filled,
-            text = "테스트 데이터 추가",
-            onClickEnabled = {},
+            text = "테스트 데이터 전체 삭제",
+            onClickEnabled = deleteTestData,
         )
 
         NPLButton(
             buttonStyle = ButtonStyle.Filled,
-            text = "테스트 데이터 전체 삭제",
-            onClickEnabled = deleteTestData,
+            text = "모든 데이터 예약 취소",
+            onClickEnabled = { reset() },
+        )
+
+        val context = LocalContext.current
+        NPLButton(
+            buttonStyle = ButtonStyle.Filled,
+            text = "로그아웃",
+            onClickEnabled = {
+                logout()
+                context.findActivity().finish()
+         },
         )
     }
+}
+
+
+fun Context.findActivity(): Activity {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    throw IllegalStateException("no activity")
 }

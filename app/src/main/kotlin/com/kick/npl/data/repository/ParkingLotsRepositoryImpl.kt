@@ -7,11 +7,7 @@ import com.kick.npl.data.model.toParkingLotData
 import com.kick.npl.data.util.module
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.model.toParkingLotEntity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.concurrent.Flow
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -60,6 +56,31 @@ class ParkingLotsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun resetRegisterAllData() {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            fireStore.module()
+                .get()
+                .addOnSuccessListener { documents ->
+                    documents.forEach {
+                        fireStore.module()
+                            .document(it.id)
+                            .update(
+                                "reserved", "",
+                                "isBlocked", true,
+                                "isOccupied", false
+                            )
+                            .addOnFailureListener { exception ->
+                                cancellableContinuation.resumeWithException(exception)
+                            }
+                    }
+                    cancellableContinuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    cancellableContinuation.resumeWithException(exception)
+                }
+        }
+    }
+
     override suspend fun setParkingLot(parkingLotData: ParkingLotData) {
         return suspendCancellableCoroutine { cancellableContinuation ->
             fireStore.module()
@@ -76,7 +97,7 @@ class ParkingLotsRepositoryImpl @Inject constructor(
 
     override suspend fun toggleFavorite(
         id: String,
-        favorite: Boolean
+        favorite: Boolean,
     ) {
         Log.e("TEST", "toggleFavorite $id $favorite")
         return suspendCancellableCoroutine { cancellableContinuation ->
@@ -120,7 +141,24 @@ class ParkingLotsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun setParkingLotData(parkingLotData: ParkingLotData) {
+    override suspend fun reserve(parkingLotId: String, userId: String) {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            fireStore.module()
+                .document(parkingLotId)
+                .update("reserved", userId)
+                .addOnSuccessListener {
+                    cancellableContinuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    cancellableContinuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    override suspend fun setParkingLotData(
+        parkingLotData: ParkingLotData,
+        userId: String,
+    ) {
         return suspendCancellableCoroutine { cancellableContinuation ->
 
             val parkingLotEntity = parkingLotData.toParkingLotEntity()
@@ -130,7 +168,9 @@ class ParkingLotsRepositoryImpl @Inject constructor(
                     "latlng", parkingLotEntity.latlng,
                     "name", parkingLotEntity.name,
                     "address", parkingLotEntity.address,
-                    "price", parkingLotEntity.pricePer10min,
+                    "pricePer10min", parkingLotEntity.pricePer10min,
+                    "provider", userId,
+                    "imageUrl", parkingLotEntity.imageUrl
                 )
                 .addOnSuccessListener {
                     cancellableContinuation.resume(Unit)

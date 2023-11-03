@@ -68,6 +68,7 @@ class AuthViewModel @Inject constructor(
 
     private fun onSignInFailure(message: String? = null) = viewModelScope.launch(Dispatchers.IO) {
         _result.update { UiState.Error(message ?: "로그인에 실패하였습니다") }
+//        _result.update { UiState.Success(Unit) }
     }
 
     private fun OAuthToken.toTokenInfo(): TokenInfo {

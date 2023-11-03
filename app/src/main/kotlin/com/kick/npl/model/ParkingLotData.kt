@@ -17,8 +17,10 @@ data class ParkingLotData(
     val favorite: Boolean,
     val pricePer10min: Int,
     val parkingLotType: ParkingLotType,
-    val isBlocked: Boolean = false,
+    val isBlocked: Boolean = true,
     val isOccupied: Boolean = false,
+    val provider: String = "Tester",
+    val reserved: String = ""
 ) : Parcelable {
     companion object {
         val TEST = ParkingLotData(
@@ -31,6 +33,7 @@ data class ParkingLotData(
             favorite = false,
             pricePer10min = 1000,
             parkingLotType = ParkingLotType.TYPE_A,
+            provider = "test"
         )
     }
 }
@@ -39,10 +42,11 @@ fun ParkingLotData.toParkingLotEntity() : ParkingLotEntity {
     return ParkingLotEntity(
         name = name,
         isBlocked = isBlocked,
-        isOccupied = false,
+        isOccupied = isOccupied,
         pricePer10min = pricePer10min,
         imageUrl = imageUri,
         latlng = GeoPoint(latLng.latitude, latLng.longitude),
         address = address,
+        provider = provider,
     )
 }

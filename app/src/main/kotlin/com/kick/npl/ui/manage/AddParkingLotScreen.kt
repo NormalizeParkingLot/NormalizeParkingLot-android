@@ -4,7 +4,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -13,7 +12,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,8 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -57,7 +53,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.google.firebase.firestore.GeoPoint
 import com.kick.npl.R
-import com.kick.npl.data.remote.dto.Center
 import com.kick.npl.ui.common.NPLButton
 import com.kick.npl.ui.common.OutlinedBox
 import com.kick.npl.ui.common.OutlinedTextField
@@ -81,9 +76,9 @@ fun AddParkingLotRoute(
     val context = LocalContext.current
     BackHandler { onClickUp() }
     LaunchedEffect(Unit) {
-        viewModel.parkingLotData.value =
-            viewModel.parkingLotData.value.copy(id = barcode)
+        barcode?.let { viewModel.getData(it) }
     }
+
     LaunchedEffect(viewModel.result) {
         viewModel.result.collect {
             when (it) {
@@ -102,6 +97,15 @@ fun AddParkingLotRoute(
                         "주차장 등록에 실패했습니다.",
                         Toast.LENGTH_SHORT
                     ).show()
+                }
+
+                AddParkingLotResult.Update -> {
+                    Toast.makeText(
+                        context,
+                        "주차장 정보를 업데이트 했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onClickUp()
                 }
             }
         }

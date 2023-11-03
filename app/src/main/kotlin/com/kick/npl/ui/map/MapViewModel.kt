@@ -3,12 +3,14 @@ package com.kick.npl.ui.map
 import android.location.Location
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kakao.sdk.user.UserApiClient
 import com.kick.npl.data.repository.MapsRepository
 import com.kick.npl.data.repository.ParkingLotsRepository
 import com.kick.npl.model.ParkingLotData
@@ -58,17 +60,26 @@ class MapViewModel @Inject constructor(
     var selectedParkingLot by mutableStateOf<SelectedParkingLotData?>(null)
         private set
 
+    private var _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
     init {
         getAllParkingLots()
+        selectedParkingLot = null
     }
 
     fun getAllParkingLots() = viewModelScope.launch(Dispatchers.IO) {
-        parkingLotsRepository.getAllParkingLots()
+        _isLoading.emit(true)
+        val result = parkingLotsRepository
+            .getAllParkingLots()
             ?.asSequence()
-            ?.filter { it.name.isNotBlank() && it.isBlocked.not() }
+            ?.filter { it.provider.isNotBlank() }
             ?.map { it.id to it }
             ?.toMap()
-            ?.let { parkingLots = it.toMutableMap() }
+            ?.toMutableMap()
+
+        if(result != null) parkingLots = result
+        _isLoading.emit(false)
     }
 
     fun onParkingDateTimeChanged(parkingDateTime: ParkingDateTime) {
@@ -87,6 +98,7 @@ class MapViewModel @Inject constructor(
     fun onMarkerClicked(
         parkingLotId: String,
     ) = viewModelScope.launch(Dispatchers.IO) {
+        _isLoading.emit(true)
         val parkingLotData = parkingLots[parkingLotId] ?: return@launch
 
         selectedParkingLot = SelectedParkingLotData(
@@ -107,6 +119,7 @@ class MapViewModel @Inject constructor(
                 LatLngBounds(leftBottom, rightTop), 200, 300, 200, 500
             )
         )
+        _isLoading.emit(false)
     }
 
     private suspend fun getDrivingRoute(
@@ -123,6 +136,7 @@ class MapViewModel @Inject constructor(
 
 
     fun onClickFavorite(parkingLotId: String) = viewModelScope.launch(Dispatchers.IO) {
+        _isLoading.emit(true)
         val parkingLotData = parkingLots[parkingLotId] ?: return@launch
 
         parkingLotsRepository.toggleFavorite(
@@ -138,6 +152,7 @@ class MapViewModel @Inject constructor(
                 parkingLotData = parkingLots[parkingLotId] ?: return@launch
             )
         }
+        _isLoading.emit(false)
     }
 
     fun onClickParkingLotCard(parkingLotId: String) {

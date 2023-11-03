@@ -9,6 +9,7 @@ import androidx.navigation.navigation
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.ui.app.NPLBottomRoute
 import com.kick.npl.ui.parkinglot.PARKING_LOT_DETAIL_KEY
+import com.kick.npl.ui.parkinglot.navigateToParkingLotDetail
 
 const val MANAGING_ROUTE = "managingStart"
 const val BARCODE_SCAN_ROUTE = "barcodeScan"
@@ -25,7 +26,8 @@ fun NavGraphBuilder.managingGraph(
             route = MANAGING_ROUTE,
         ) {
             ManagingRoute(
-                navigateToBarcodeScan = { navController.navigate(BARCODE_SCAN_ROUTE) }
+                navigateToBarcodeScan = { navController.navigate(BARCODE_SCAN_ROUTE) },
+                navigateToDetail = { navController.navigateToParkingLotDetail(it, edit = true) }
             )
         }
         composable(
@@ -51,11 +53,11 @@ fun NavGraphBuilder.managingGraph(
 @Composable
 fun ManagingRoute(
     navigateToBarcodeScan: () -> Unit,
-    viewModel: ManagingViewModel = hiltViewModel(),
+    navigateToDetail: (ParkingLotData) -> Unit,
 ) {
     ManagingScreen(
-        isLoading = false,
         navigateToBarcodeScan = navigateToBarcodeScan,
+        navigateToDetail = navigateToDetail
     )
 }
 

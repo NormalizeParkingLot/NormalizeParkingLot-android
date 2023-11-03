@@ -12,10 +12,10 @@ data class ParkingLotEntity(
     var name: String = "",
     @get:PropertyName("isBlocked")
     @set:PropertyName("isBlocked")
-    var isBlocked: Boolean = false,
+    var isBlocked: Boolean = true,
     @get:PropertyName("isOccupied")
     @set:PropertyName("isOccupied")
-    var isOccupied: Boolean = true,
+    var isOccupied: Boolean = false,
     @get:PropertyName("pricePer10min")
     @set:PropertyName("pricePer10min")
     var pricePer10min: Int = 0,
@@ -34,6 +34,12 @@ data class ParkingLotEntity(
     @get:PropertyName("addressDetail")
     @set:PropertyName("addressDetail")
     var addressDetail: String = "",
+    @get:PropertyName("provider")
+    @set:PropertyName("provider")
+    var provider: String = "",
+    @get:PropertyName("reserved")
+    @set:PropertyName("reserved")
+    var reserved: String = "",
 )
 
 fun ParkingLotEntity.toParkingLotData(id: String): ParkingLotData {
@@ -47,6 +53,9 @@ fun ParkingLotEntity.toParkingLotData(id: String): ParkingLotData {
         favorite = favorite,
         pricePer10min = pricePer10min,
         parkingLotType = ParkingLotType.TYPE_A,
-        isBlocked = isBlocked
+        isBlocked = isBlocked,
+        isOccupied = isOccupied,
+        provider = provider,
+        reserved = reserved
     )
 }

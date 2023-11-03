@@ -43,14 +43,9 @@ fun NPLBottomNavBar(
             label = { Text(item.title) },
             selected = selected,
             onClick = {
-
-                if(selected && item.route == NPLBottomRoute.Map.route) {
-//                    val startDestination = navController.graph.findStartDestination().route?
-//                    startDestination?.let { navController.navigate(it) }
-                    navController.popBackStack()
-                }
+                val startDestinationId = navController.graph.findStartDestination().id
                 navController.navigate(item.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
+                    popUpTo(startDestinationId) {
                         saveState = true
                     }
                     launchSingleTop = true

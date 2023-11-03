@@ -1,12 +1,13 @@
 package com.kick.npl.ui.manage
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.GeoPoint
+import com.kick.npl.data.local.UserIdDataSource
+import com.kick.npl.data.model.toParkingLotData
 import com.kick.npl.data.repository.MapsRepository
 import com.kick.npl.data.repository.ParkingLotsRepository
 import com.kick.npl.model.ParkingLotData
@@ -21,8 +22,12 @@ import javax.inject.Inject
 @HiltViewModel
 class AddParkingLotViewModel @Inject constructor(
     private val mapsRepository: MapsRepository,
-    private val parkingLotsRepository: ParkingLotsRepository
+    private val parkingLotsRepository: ParkingLotsRepository,
+    private val dataSource: UserIdDataSource,
 ) : ViewModel() {
+
+    private val userId by lazy { dataSource.getUserId() }
+
     val parkingLotData = mutableStateOf(AddParkingLotUiState())
     val temporalAddressName = mutableStateOf<String?>(null)
 
@@ -43,15 +48,39 @@ class AddParkingLotViewModel @Inject constructor(
     }
 
     fun registerParkingLot() {
-        Log.d("TEST", "registerParkingLot: ${parkingLotData.value}")
         isLoading = true
-        parkingLotData.value = parkingLotData.value.copy(
-            imageUrl = "https://mediahub.seoul.go.kr/uploads/mediahub/2022/02/uZmjEIGLXJCxhjAVQoPvTClPSIkOCIyN.png",
-        )
         viewModelScope.launch(Dispatchers.IO) {
-            parkingLotsRepository
-                .setParkingLot(parkingLotData.value.toParkingLotData())
+
+            userId?.let {
+                parkingLotsRepository.setParkingLotData(
+                    parkingLotData.value.toParkingLotData(),
+                    it
+                )
+            }
+
             _result.emit(AddParkingLotResult.Success)
+        }
+        isLoading = false
+    }
+
+    fun getData(id: String) {
+        isLoading = true
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val data = parkingLotsRepository.getParkingLot(id)?.toParkingLotData(id)
+
+            if (data != null) {
+                parkingLotData.value = parkingLotData.value.copy(
+                    id = id,
+                    title = data.name,
+                    address = data.address,
+                    description = data.addressDetail,
+                    latlng = data.latLng.let { GeoPoint(it.latitude, it.longitude) },
+                    pricePer10min = data.pricePer10min,
+                )
+            } else {
+                parkingLotData.value = parkingLotData.value.copy(id = id)
+            }
         }
         isLoading = false
     }
@@ -60,6 +89,8 @@ class AddParkingLotViewModel @Inject constructor(
 sealed class AddParkingLotResult {
     data object Success : AddParkingLotResult()
     data class Failure(val message: String) : AddParkingLotResult()
+
+    data object Update : AddParkingLotResult()
 }
 
 data class AddParkingLotUiState(
@@ -76,7 +107,7 @@ data class AddParkingLotUiState(
         name = title ?: "",
         address = address ?: "",
         addressDetail = description ?: "",
-        imageUri = imageUrl ?: "",
+        imageUri = "https://i.imgur.com/nVutgKq.png",
         latLng = LatLng(latlng?.latitude ?: 0.0, latlng?.longitude ?: 0.0),
         favorite = false,
         pricePer10min = pricePer10min ?: 0,

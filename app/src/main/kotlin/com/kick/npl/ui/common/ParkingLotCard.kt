@@ -72,6 +72,7 @@ fun ParkingLotCard(
     haveBorder: Boolean = false,
     onClickCard: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
+    enableFavorite: Boolean = true
 ) = Card(
     modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 100.dp),
     shape = CardDefaults.elevatedShape,
@@ -99,7 +100,8 @@ fun ParkingLotCard(
             ParkingLotCardContent(
                 parkingLotData = parkingLotData,
                 onClickCard = onClickCard,
-                onClickFavorite = onClickFavorite
+                onClickFavorite = onClickFavorite,
+                enableFavorite = enableFavorite
             )
         }
     }
@@ -110,6 +112,7 @@ fun ParkingLotCardContent(
     parkingLotData: ParkingLotData,
     onClickCard: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
+    enableFavorite: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -136,17 +139,19 @@ fun ParkingLotCardContent(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Icon(
-                painterResource(
-                    if (parkingLotData.favorite) R.drawable.ic_star_filled
-                    else R.drawable.ic_star_border
-                ),
-                contentDescription = null,
-                tint = if (parkingLotData.favorite) Color(0xFFFFCA00) else Theme.colors.line,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable(onClick = onClickFavorite)
-            )
+            if(enableFavorite) {
+                Icon(
+                    painterResource(
+                        if (parkingLotData.favorite) R.drawable.ic_star_filled
+                        else R.drawable.ic_star_border
+                    ),
+                    contentDescription = null,
+                    tint = if (parkingLotData.favorite) Color(0xFFFFCA00) else Theme.colors.line,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(onClick = onClickFavorite)
+                )
+            }
         }
         Text(
             text = buildAnnotatedString {

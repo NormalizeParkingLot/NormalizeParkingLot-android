@@ -60,6 +60,7 @@ fun SettingRoute(
             mockTestData = viewModel::mockData,
             deleteTestData = viewModel::deleteAllTestParkingLots,
             logout = viewModel::logout,
+            reset = viewModel::reset
         )
     }
 }

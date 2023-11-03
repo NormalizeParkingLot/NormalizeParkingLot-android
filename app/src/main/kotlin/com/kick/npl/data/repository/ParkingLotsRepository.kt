@@ -11,5 +11,7 @@ interface ParkingLotsRepository {
     suspend fun deleteTestParkingLot(id: String)
 
     suspend fun setIsBlocked(id: String, isBlocked: Boolean)
-    suspend fun setParkingLotData(parkingLotData: ParkingLotData)
+    suspend fun setParkingLotData(parkingLotData: ParkingLotData, userId: String)
+    suspend fun reserve(parkingLotId: String, userId: String)
+    suspend fun resetRegisterAllData()
 }

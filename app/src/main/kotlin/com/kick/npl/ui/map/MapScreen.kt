@@ -3,6 +3,7 @@ package com.kick.npl.ui.map
 import android.location.Location
 import android.util.Log
 import android.view.Gravity
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -11,6 +12,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,9 +20,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -32,10 +39,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.zIndex
+import com.kakao.sdk.user.UserApiClient
 import com.kick.npl.R
 import com.kick.npl.model.ParkingLotData
 import com.kick.npl.ui.common.BottomSheet
@@ -46,6 +58,7 @@ import com.kick.npl.ui.map.model.ParkingDateTime
 import com.kick.npl.ui.map.model.SelectedParkingLotData
 import com.kick.npl.ui.theme.NPLTheme
 import com.kick.npl.ui.theme.Theme
+import com.kick.npl.ui.util.noRippleClickable
 import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.naver.maps.map.compose.LocationTrackingMode
@@ -76,6 +89,7 @@ fun MapScreen(
     onParkingDateTimeChanged: (ParkingDateTime) -> Unit = {},
     onClickFavorite: (String) -> Unit = {},
     onClickParkingLotCard: (String) -> Unit = {},
+    isLoading: Boolean,
 ) = Column(
     modifier = Modifier.fillMaxSize()
 ) {
@@ -100,10 +114,17 @@ fun MapScreen(
         onClickChangeButton = { isTimePickerVisible = true }
     )
 
+    val columnState = rememberLazyListState()
+
+    LaunchedEffect(selectedParkingLot) {
+        columnState.scrollToItem(0)
+    }
+
     BottomSheet(
         onExpanded = onMarkerUnselected,
         sheetContent = { hide ->
             LazyColumn(
+                state = columnState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .sizeIn(minHeight = 100.dp)
@@ -133,7 +154,9 @@ fun MapScreen(
                 onMarkerUnselected,
                 onLocationChange,
                 onClickFavorite,
-                onClickParkingLotCard
+                onClickParkingLotCard,
+                getAllParkingLots,
+                isLoading,
             )
         }
     )
@@ -150,6 +173,8 @@ fun MapScreenContent(
     onLocationChange: (Location) -> Unit,
     onClickFavorite: (String) -> Unit = {},
     onClickParkingLotCard: (String) -> Unit = {},
+    getAllParkingLots: () -> Unit = {},
+    isLoading: Boolean,
 ) {
     Box {
         AnimatedVisibility(
@@ -164,10 +189,44 @@ fun MapScreenContent(
             ParkingLotCard(
                 selectedParkingLot?.parkingLotData,
                 modifier = Modifier.padding(horizontal = 12.dp),
-                onClickFavorite = { if(id != null) onClickFavorite(id) },
-                onClickCard = { if(id != null) onClickParkingLotCard(id) }
+                onClickFavorite = { if (id != null) onClickFavorite(id) },
+                onClickCard = { if (id != null) onClickParkingLotCard(id) }
             )
         }
+
+        AnimatedContent(
+            targetState = isLoading,
+            label = "",
+            modifier = Modifier
+                .padding(16.dp)
+                .shadow(8.dp, CircleShape, true)
+                .background(Theme.colors.surface)
+                .align(Alignment.TopEnd)
+        ) { loading ->
+            when (loading) {
+                true -> {
+                    CircularProgressIndicator(
+                        color = Theme.colors.primary,
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .size(24.dp)
+                    )
+                }
+
+                false -> {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_refresh_24),
+                        contentDescription = null,
+                        tint = Theme.colors.onSurface0,
+                        modifier = Modifier
+                            .noRippleClickable { getAllParkingLots() }
+                            .padding(16.dp)
+                            .size(24.dp),
+                    )
+                }
+            }
+        }
+
 
         NaverMap(
             modifier = Modifier
@@ -238,30 +297,51 @@ fun MapScreenContent(
                 )
             }
 
+            var userId by remember { mutableStateOf("") }
+            LaunchedEffect(Unit) {
+                UserApiClient.instance.me { user, error ->
+                    if (error != null) {
+                        Log.e("TEST", "사용자 정보 요청 실패", error)
+                    }
+                    else if (user != null) {
+                        user?.kakaoAccount?.email?.let { userId = it }
+                    }
+                }
+            }
+
+
             parkingLotList.forEach { parkingLotData ->
                 val isSelected = selectedParkingLot?.parkingLotData?.id == parkingLotData.id
                 val animatedSize by animateFloatAsState(
                     label = "marker size multiplier",
-                    targetValue = if(isSelected) 1.2f else 0.9f
+                    targetValue = if (isSelected) 1.2f else 0.9f
                 )
+                if(isSelected) {
+                    Log.d("TEST", selectedParkingLot?.parkingLotData.toString())
+                }
 
                 Marker(
                     width = (animatedSize * 44).dp,
                     height = (animatedSize * 55).dp,
-                    zIndex = if(isSelected) 2 else 0,
+                    zIndex = if (isSelected) 2 else 0,
                     icon = OverlayImage.fromResource(
-                        when(isSelected) {
+                        when (isSelected) {
                             true -> R.drawable.ic_marker_selected
                             false -> R.drawable.ic_marker_circle
                         }
                     ),
-                    iconTintColor = Theme.colors.primary,
+                    iconTintColor =
+                    if (parkingLotData.provider == userId) Theme.colors.graphSafety
+                    else if (parkingLotData.enabled) Theme.colors.primary
+                    else Theme.colors.onBackground60,
                     state = MarkerState(parkingLotData.latLng),
                     captionMinZoom = 11.0,
                     subCaptionMinZoom = 11.0,
                     captionText = parkingLotData.name,
                     onClick = {
-                        onParkingLotMarkerClicked(parkingLotData.id)
+                        if (parkingLotData.provider != userId && parkingLotData.enabled) {
+                            onParkingLotMarkerClicked(parkingLotData.id)
+                        }
                         true
                     }
                 )
@@ -269,3 +349,6 @@ fun MapScreenContent(
         }
     }
 }
+
+private val ParkingLotData.enabled: Boolean
+    get() = reserved.isBlank() && isBlocked && isOccupied.not()

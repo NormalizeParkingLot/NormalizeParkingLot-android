@@ -20,4 +20,11 @@ class AuthLocalDataSource @Inject constructor(
             apply()
         }
     }
+
+    fun logout() {
+        with (sharedPreferences.edit()) {
+            putString(keyToken, "")
+            apply()
+        }
+    }
 }

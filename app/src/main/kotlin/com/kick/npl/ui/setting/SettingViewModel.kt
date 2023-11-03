@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.user.UserApiClient
+import com.kick.npl.data.local.AuthLocalDataSource
 import com.kick.npl.data.model.toParkingLotData
 import com.kick.npl.data.repository.ParkingLotsRepository
 import com.kick.npl.model.ParkingLotData
@@ -24,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingViewModel @Inject constructor(
     private val parkingLotsRepository: ParkingLotsRepository,
+    private val localDataSource: AuthLocalDataSource,
 ) : ViewModel() {
 
     var parkingLotData by mutableStateOf<ParkingLotData?>(null)
@@ -72,15 +74,15 @@ class SettingViewModel @Inject constructor(
         isLoading = true
         generateSampleParkingLots()
             .forEachIndexed { index, data ->
+                val url = data.imageUri.ifBlank { "https://i.imgur.com/nVutgKq.png" }
                 parkingLotsRepository.setParkingLot(
                     data.copy(
                         id = "Test:${1000 + index}",
-                        imageUri = "https://i.imgur.com/nVutgKq.png",
-                        isBlocked = false
+                        imageUri = url,
                     )
                 )
             }
-        _toastMessage.send("Mock data generated")
+        _toastMessage.send("테스트 데이터가 생성되었습니다.")
         isLoading = false
     }
 
@@ -89,6 +91,16 @@ class SettingViewModel @Inject constructor(
             UserApiClient.instance.logout { error ->
                 error?.printStackTrace()
             }
+            localDataSource.logout()
+            _toastMessage.send("로그아웃 되었습니다.")
         }
     }
+
+    fun reset() = viewModelScope.launch(Dispatchers.IO) {
+        isLoading = true
+        parkingLotsRepository.resetRegisterAllData()
+        _toastMessage.send("모든 예약 초기화")
+        isLoading = false
+    }
+
 }

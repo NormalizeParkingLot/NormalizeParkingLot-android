@@ -74,6 +74,8 @@ fun ParkingLotDetailScreen(
     parkingLotData: ParkingLotData,
     parkingDateTime: ParkingDateTime?,
     onClickClose: () -> Unit,
+    editMode: Boolean,
+    onClickEdit: () -> Unit,
     viewModel: ParkingLotDetailViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -107,7 +109,10 @@ fun ParkingLotDetailScreen(
             .fillMaxSize()
             .background(color = Theme.colors.background),
     ) {
-        TopBar(onClickClose = onClickClose)
+        TopBar(
+            onClickClose = onClickClose,
+            isReservation = !editMode && parkingDateTime != null
+        )
 
         AnimatedContent(targetState = viewModel.isLoading, label = "") {
             when (it) {
@@ -131,6 +136,7 @@ fun ParkingLotDetailScreen(
                             isAllAgreed,
                             onClickAgree = { isAllAgreed = it },
                             isAgreementEnable = isPaymentEnable,
+                            editMode = editMode,
                         )
                         FloatingButton(
                             price = if (isPaymentEnable) {
@@ -145,11 +151,13 @@ fun ParkingLotDetailScreen(
                             modifier = Modifier.align(Alignment.BottomCenter),
                             onClickButton = {
                                 if (isPaymentEnable) {
-                                    viewModel.updateField(parkingLotData.id, false)
+                                    viewModel.reserveParkingLot(parkingLotData.id)
                                 } else {
-                                    onClickClose()
+                                    if(editMode) onClickEdit()
+                                    else onClickClose()
                                 }
                             },
+                            editMode = editMode
                         )
                     }
                 }
@@ -161,7 +169,10 @@ fun ParkingLotDetailScreen(
 
 
 @Composable
-private fun TopBar(onClickClose: () -> Unit) {
+private fun TopBar(
+    onClickClose: () -> Unit,
+    isReservation: Boolean,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,7 +189,7 @@ private fun TopBar(onClickClose: () -> Unit) {
                 .align(Alignment.CenterStart)
         )
         Text(
-            text = "주차장 예약하기",
+            text = if(isReservation) "주차장 예약하기" else "주차장 정보",
             style = Theme.typo.subheadB,
             color = Theme.colors.onSurface0,
             modifier = Modifier.align(Alignment.Center)
@@ -192,6 +203,7 @@ private fun FloatingButton(
     isEnabled: Boolean,
     modifier: Modifier = Modifier,
     onClickButton: () -> Unit = {},
+    editMode: Boolean
 ) {
     Box(
         modifier = modifier
@@ -202,7 +214,7 @@ private fun FloatingButton(
             .wrapContentHeight()
     ) {
         NPLButton(
-            text = if (price != null) "총 ${DecimalFormat("##,###").format(price)} 원 결제하기" else "확인",
+            text = if (editMode) "수정" else if (price != null) "총 ${DecimalFormat("##,###").format(price)} 원 결제하기" else "확인",
             buttonStyle = ButtonStyle.Filled,
             isEnabled = if (price != null) isEnabled else true,
             modifier = Modifier
@@ -219,6 +231,7 @@ private fun ParkingLotDetailContent(
     isAgreed: Boolean,
     onClickAgree: (Boolean) -> Unit = {},
     isAgreementEnable: Boolean,
+    editMode: Boolean,
 ) {
 
     Column(
@@ -230,8 +243,12 @@ private fun ParkingLotDetailContent(
         Spacer(Modifier.height(4.dp))
         BasicInfoSection(parkingLotData)
         LocationInfoSection(parkingLotData)
-        parkingDateTime?.let { PeriodSection(it) }
-        if (parkingDateTime != null) {
+        parkingDateTime?.let {
+            if(!editMode) {
+                PeriodSection(it)
+            }
+        }
+        if (parkingDateTime != null && !editMode) {
             PaymentSection(
                 parkingLotData.pricePer10min,
                 Duration.between(parkingDateTime.startTime, parkingDateTime.endTime)

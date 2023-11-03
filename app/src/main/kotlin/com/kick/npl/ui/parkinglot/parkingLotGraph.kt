@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.kick.npl.model.ParkingLotData
+import com.kick.npl.ui.manage.ADD_PARKING_LOT_ROUTE
 import com.kick.npl.ui.map.model.ParkingDateTime
 import com.kick.npl.ui.theme.Theme
 import kotlinx.coroutines.delay
@@ -24,6 +25,7 @@ import kotlinx.coroutines.delay
 const val PARKING_LOT_DETAIL = "parkingLotDetail"
 const val PARKING_LOT_DETAIL_KEY = "parkingLotDetailKey"
 const val PARKING_DATE_TIME_KEY = "parkingDateTimeKey"
+const val PARKING_LOT_EDIT = "parkingLotEdit"
 
 fun NavGraphBuilder.parkingLotGraph(
     navController: NavController,
@@ -33,6 +35,7 @@ fun NavGraphBuilder.parkingLotGraph(
     ) {
         val parkingLotData = it.savedStateHandle.get<ParkingLotData>(PARKING_LOT_DETAIL_KEY)
         val parkingDateTime = it.savedStateHandle.get<ParkingDateTime?>(PARKING_DATE_TIME_KEY)
+        val editMode = it.savedStateHandle.get<Boolean>(PARKING_LOT_EDIT) ?: false
         val popUp = { navController.popBackStack() }
 
         var delay by remember { mutableStateOf(true) }
@@ -57,6 +60,11 @@ fun NavGraphBuilder.parkingLotGraph(
                     parkingLotData = parkingLotData ?: run { popUp(); return@AnimatedContent },
                     parkingDateTime = parkingDateTime,
                     onClickClose = { navController.popBackStack() },
+                    onClickEdit = {
+                        navController.navigate(ADD_PARKING_LOT_ROUTE)
+                        navController.currentBackStackEntry?.savedStateHandle?.set("barcode", parkingLotData.id)
+                    },
+                    editMode = editMode,
                 )
             }
         }
@@ -66,8 +74,10 @@ fun NavGraphBuilder.parkingLotGraph(
 fun NavController.navigateToParkingLotDetail(
     parkingLotData: ParkingLotData,
     parkingDateTime: ParkingDateTime? = null,
+    edit: Boolean = false
 ) {
     navigate(PARKING_LOT_DETAIL)
     currentBackStackEntry?.savedStateHandle?.set(PARKING_LOT_DETAIL_KEY, parkingLotData)
     currentBackStackEntry?.savedStateHandle?.set(PARKING_DATE_TIME_KEY, parkingDateTime)
+    currentBackStackEntry?.savedStateHandle?.set(PARKING_LOT_EDIT, edit)
 }
